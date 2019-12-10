@@ -33,7 +33,7 @@ def update_pre_paths_dict(pre_paths_dict, predecessor_dict, order, matrix, state
 
 
 # algorithm from paper
-def main(states, final_states, alphabet, order, matrix):
+def increase_unambiguity(states, final_states, alphabet, order, matrix):
     predecessor_dict = {}
     initial_states = list(states)
     for q in states:
@@ -83,13 +83,13 @@ def main(states, final_states, alphabet, order, matrix):
                 if all(q != delta(p, x, matrix) for x in alphabet):
                     predecessor_dict[q].remove(q)
             pre_paths_dict[q].remove(a)
-    print(states)
-    print(pre_paths_dict)  # TODO: pre_paths_dict[Qab] empty - problem for higher orders?
-    print(predecessor_dict)
-    print(final_states)
-    print(matrix)
+    #print(states)
+    #print(pre_paths_dict)  # TODO: pre_paths_dict[Qab] empty - problem for higher orders?
+    #print(predecessor_dict)
+    #print(final_states)
+    #print(matrix)
 
-    assert(matrix == {'B': {'B': ['b'], 'A': ['a'], 'B2': [''], "Q['a', 'a']": [], "Q['b', 'b']": []}, 'A': {'B': [''], 'A': [], 'B2': ['b'], "Q['a', 'a']": ['a'], "Q['b', 'b']": []}, 'B2': {'B': [''], 'A': ['a'], 'B2': [], "Q['a', 'a']": [], "Q['b', 'b']": ['b']}, "Q['a', 'a']": {'B': [], 'A': [], 'B2': ['b'], "Q['a', 'a']": ['a'], "Q['b', 'b']": []}, "Q['b', 'b']": {'B': [], 'A': ['a'], 'B2': [], "Q['a', 'a']": [], "Q['b', 'b']": ['b']}})
+    #assert(matrix == {'B': {'B': ['b'], 'A': ['a'], 'B2': [''], "Q['a', 'a']": [], "Q['b', 'b']": []}, 'A': {'B': [''], 'A': [], 'B2': ['b'], "Q['a', 'a']": ['a'], "Q['b', 'b']": []}, 'B2': {'B': [''], 'A': ['a'], 'B2': [], "Q['a', 'a']": [], "Q['b', 'b']": ['b']}, "Q['a', 'a']": {'B': [], 'A': [], 'B2': ['b'], "Q['a', 'a']": ['a'], "Q['b', 'b']": []}, "Q['b', 'b']": {'B': [], 'A': ['a'], 'B2': [], "Q['a', 'a']": [], "Q['b', 'b']": ['b']}})
 
 
 # Test if algorithm returns the correct paths
@@ -136,4 +136,4 @@ initial_matrix = {"B": {"B": ["b"], "A": ["a"], "B2": [""]},
 order = 2
 
 test_dfs()
-main(states, final_states, alphabet, order, initial_matrix)
+#increase_unambiguity(states, final_states, alphabet, order, initial_matrix)
