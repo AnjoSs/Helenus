@@ -15,11 +15,17 @@ class DFA:
     def insert_state(self, state):
         return self.state_transition_matrix.insert_state(state)
 
+    def delta(self, state, letter):
+        return self.state_transition_matrix.delta(state, letter)
+
+    def copy_delta(self, source, target):
+        return self.state_transition_matrix.copy_delta(source, target)
+
     def increase_unambiguity(self, order):
         initial_states = list(self.states)
         print(initial_states)
         for q in initial_states:
-            pre_paths = self.get_prepaths(order, q, q)
+            pre_paths = self.get_prepaths(order, q, q) #still buggy
             print(pre_paths)
             while len(pre_paths) > 1:
                 a = pre_paths[0]
@@ -32,20 +38,13 @@ class DFA:
                 if q in self.final_states:
                     self.final_states.append(qa)
 
+                pre_paths_qa = a
+                predecessor_states_qa = []
 
-                ### Todo
-                pre_paths_dict[qa] = [a]
-                predecessor_dict[qa] = []
+                self.copy_delta(q, qa)
 
-                for b in alphabet:
-                    matrix[qa][delta(q, b, matrix)].append(b)
-                    predecessor_dict[delta(q, b, matrix)].append(qa)
-
-                # for delta to the power of -(m-1)
-                Dm1 = {}
-                update_pre_paths_dict(Dm1, predecessor_dict, order - 1, matrix, states)
-
-                for p in predecessor_dict[q]:
+                # TODO: 
+                for p in self.get_predecessor_states(q):
                     if delta(p, a[-1], matrix) == q and a[:-1] in Dm1[p]:
                         predecessor_dict[qa].append(p)
                         matrix[p][qa].append(a[-1])

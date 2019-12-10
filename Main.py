@@ -3,15 +3,6 @@ from State_Transition_Matrix_Class import State_Transition_Matrix
 from DFA_Class import DFA
 
 def main():
-    #states = Input_DFA.states
-    #final_states = Input_DFA.final_states
-    #alphabet = Input_DFA.alphabet
-    #matrix = Input_DFA.initial_matrix
-    #desired_order = 2 #hard coded order that we want to train our markov chain on
-    #for order in range(1, desired_order+1):
-    #    increase_unambiguity(states, final_states, alphabet, order, matrix)
-    #    print(matrix)
-
     # hardcoded input values
     states = ['A', 'B', 'B2']
     start_state = ['B']

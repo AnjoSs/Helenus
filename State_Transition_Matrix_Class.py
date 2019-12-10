@@ -38,4 +38,9 @@ class State_Transition_Matrix:
             self.matrix[self.state_list.index(state)].append('')
             if i < len(self.state_list)-1:
                 self.matrix[i].append('')
-        print(self.matrix)
+
+    def delta(self, state, letter):
+        return self.state_list[self.matrix[state].index(letter)]
+
+    def copy_delta(self, source, target):
+        self.matrix[self.state_list.index(target)] = self.matrix[self.state_list.index(source)]
