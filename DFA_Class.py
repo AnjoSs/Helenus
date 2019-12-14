@@ -9,8 +9,8 @@ class DFA:
     def get_predecessor_states(self, state):
         return self.state_transition_matrix.get_predecessor_states(state)
 
-    def get_prepaths(self, depth, current_state, target): # wtf is the target?
-        return self.state_transition_matrix.get_prepaths(depth, current_state, [], target, [])
+    def get_prepaths(self, depth, current_state): # wtf is the target?
+        return self.state_transition_matrix.get_prepaths(depth, current_state)
 
     def insert_state(self, state):
         return self.state_transition_matrix.insert_state(state)
@@ -21,38 +21,55 @@ class DFA:
     def copy_delta(self, source, target):
         return self.state_transition_matrix.copy_delta(source, target)
 
+    def set_transition(self, source, target, letter):
+        self.state_transition_matrix.set_transition(source, target, letter)
+
     def increase_unambiguity(self, order):
         initial_states = list(self.states)
+        print(self.state_transition_matrix)
         print(initial_states)
         for q in initial_states:
-            pre_paths = self.get_prepaths(order, q, q) #still buggy
+            print('initial_states loop:')
+            print('q: ' + q)
+            pre_paths = self.get_prepaths(order, q) #still buggy
+            print('pre_paths:')
             print(pre_paths)
             while len(pre_paths) > 1:
+                print('while loop')
                 a = pre_paths[0]
                 qa = "Q" + str(pre_paths[0])
+                print('choosen word: ' + a)
+                print('new state: ' + qa)
 
                 # add qa to matrix
                 self.states.append(qa)
                 self.state_transition_matrix.insert_state(qa)
 
+                print('new states: ' + str(self.states))
+                print('new matrix:')
+                print(self.state_transition_matrix.matrix)
+
                 if q in self.final_states:
                     self.final_states.append(qa)
 
-                pre_paths_qa = a
-                predecessor_states_qa = []
+                #pre_paths_qa = a
+                #predecessor_states_qa = []
 
                 self.copy_delta(q, qa)
+                print('matrix after copy delta:')
+                print(self.state_transition_matrix.matrix)
 
-                # TODO: 
+                print('get_predecessor_states(q): ' + str(self.get_predecessor_states(q)))
                 for p in self.get_predecessor_states(q):
-                    if delta(p, a[-1], matrix) == q and a[:-1] in Dm1[p]:
-                        predecessor_dict[qa].append(p)
-                        matrix[p][qa].append(a[-1])
-                        matrix[p][q].remove(a[-1])
-                        predecessor_dict[q].remove(p)
-
-                        update_pre_paths_dict(Dm1, predecessor_dict, order - 1, matrix, states)
-                for p in predecessor_dict[q]:
-                    if all(q != delta(p, x, matrix) for x in alphabet):
-                        predecessor_dict[q].remove(q)
-                pre_paths_dict[q].remove(a)
+                    print('p: ' + p)
+                    print('a[-1]: ' + a[-1])
+                    print(self.delta(p, a[-1]))
+                    if (self.delta(p, a[-1]) == q) and (a[:-1] in self.get_prepaths(order-1, p)):
+                        self.set_transition(p, qa, a[-1])
+                        self.set_transition(p, q, '')
+                print('matrix after adjusting transitions:')
+                print(self.state_transition_matrix.matrix)
+                #for p in self.get_predecessor_states(q):
+                #    if all(q != delta(p, x, matrix) for x in alphabet):
+                #        predecessor_dict[q].remove(q)
+                pre_paths.remove(a)

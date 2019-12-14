@@ -13,7 +13,7 @@ def main():
 
 
     # create DFA Object with a State Transition Matrix Object
-    matrix = State_Transition_Matrix(states, state_transition_matrix)
+    matrix = State_Transition_Matrix(states, alphabet, state_transition_matrix)
     dfa = DFA(states, start_state, alphabet, final_states, matrix)
 
     ## make DFA iteratively unambiguous
