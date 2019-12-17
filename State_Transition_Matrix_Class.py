@@ -67,9 +67,17 @@ class State_Transition_Matrix:
 
     def transpose_matrix(self):
         transposed_matrix = []
+        #print(self.matrix)
+        #print(range(len(self.matrix)))
         for column in range(len(self.matrix)):
+            #print('column: ' + str(column))
             transposed_matrix.append([])
+            #print(transposed_matrix)
+            #print(self.matrix[column])
+            #print(range(len(self.matrix[column])))
             for row in range(len(self.matrix[column])):
+                #print(row)
+                #print(transposed_matrix)
                 transposed_matrix[column].append(self.matrix[row][column])
         return transposed_matrix
 

@@ -26,7 +26,7 @@ class DFA:
 
     def increase_unambiguity(self, order):
         initial_states = list(self.states)
-        print(self.state_transition_matrix)
+        print(self.state_transition_matrix.matrix)
         print(initial_states)
         for q in initial_states:
             print('initial_states loop:')
@@ -37,13 +37,16 @@ class DFA:
             while len(pre_paths) > 1:
                 print('while loop')
                 a = pre_paths[0]
-                qa = "Q" + str(pre_paths[0])
+                qa = q + str(pre_paths[0])
                 print('choosen word: ' + a)
                 print('new state: ' + qa)
 
                 # add qa to matrix
-                self.states.append(qa)
-                self.state_transition_matrix.insert_state(qa)
+                #self.states.append(qa)
+                #print('new states: ' + str(self.states
+                print('old matrix:')
+                print(self.state_transition_matrix.matrix)
+                self.insert_state(qa)
 
                 print('new states: ' + str(self.states))
                 print('new matrix:')
