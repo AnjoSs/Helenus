@@ -68,8 +68,8 @@ class DFA:
                     print('a[-1]: ' + a[-1])
                     print(self.delta(p, a[-1]))
                     if (self.delta(p, a[-1]) == q) and (a[:-1] in self.get_prepaths(order-1, p)):
-                        self.set_transition(p, qa, list(a[-1]))
-                        self.set_transition(p, q, [])
+                        self.state_transition_matrix.remove_transition(p, q, a[-1])
+                        self.state_transition_matrix.add_transition(p, qa, a[-1])
                 print('matrix after adjusting transitions:')
                 print(self.state_transition_matrix.matrix)
                 #for p in self.get_predecessor_states(q):

@@ -34,6 +34,7 @@ class State_Transition_Matrix:
             print(letter_pos)
             if matrix[self.state_list.index(current_state)][letter_pos] != []:
                 letters = matrix[self.state_list.index(current_state)][letter_pos]
+                print(letters)
 
                 for letter in letters:
                     print(letter)
@@ -45,6 +46,7 @@ class State_Transition_Matrix:
                         print(next_path)
                         print(letter)
                         paths.append(next_path + letter)
+        print(paths)
         return paths
 
 
@@ -110,5 +112,8 @@ class State_Transition_Matrix:
         return transposed_matrix
 
 
-    def set_transition(self, source, target, letter):
+    def add_transition(self, source, target, letter):
         self.matrix[self.state_list.index(source)][self.state_list.index(target)].append(letter)
+
+    def remove_transition(self, source, target, letter):
+        self.matrix[self.state_list.index(source)][self.state_list.index(target)].remove(letter)
