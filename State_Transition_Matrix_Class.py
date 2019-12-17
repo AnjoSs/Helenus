@@ -49,12 +49,28 @@ class State_Transition_Matrix:
 
 
     def insert_state(self, state):
-        self.state_list.append(state)
         self.matrix.append([])
         for i in range(0, len(self.state_list)):
-            self.matrix[self.state_list.index(state)].append('')
-            if i < len(self.state_list)-1:
-                self.matrix[i].append('')
+            self.matrix[len(self.state_list)].append('')
+            print(self.matrix)
+
+        self.state_list.append(state)
+        for i in range(0, len(self.state_list)):
+            print(i)
+            print(self.matrix[i])
+            self.matrix[i].append('')
+            print(self.matrix)
+
+
+        #self.state_list.append(state)
+        #self.matrix.append([])
+        #print(self.matrix)
+        #for i in range(0, len(self.state_list)):
+        #    self.matrix[self.state_list.index(state)].append('')
+        #    print(self.matrix)
+        #    if i < len(self.state_list)-1:
+        #        self.matrix[i].append('')
+        #        print(self.matrix)
 
 
     def delta(self, state, letter):
@@ -62,7 +78,7 @@ class State_Transition_Matrix:
 
 
     def copy_delta(self, source, target):
-        self.matrix[self.state_list.index(target)] = self.matrix[self.state_list.index(source)]
+        self.matrix[self.state_list.index(target)] = list(self.matrix[self.state_list.index(source)])
 
 
     def transpose_matrix(self):
