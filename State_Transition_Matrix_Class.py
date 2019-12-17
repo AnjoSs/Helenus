@@ -1,3 +1,5 @@
+import copy
+
 class State_Transition_Matrix:
     def __init__(self, states, alphabet, matrix):
         self.state_list = states
@@ -90,7 +92,8 @@ class State_Transition_Matrix:
 
 
     def copy_delta(self, source, target):
-        self.matrix[self.state_list.index(target)] = list(self.matrix[self.state_list.index(source)])
+        self.matrix[self.state_list.index(target)] = copy.deepcopy(self.matrix[self.state_list.index(source)])
+        print(self.matrix)
 
 
     def transpose_matrix(self):
