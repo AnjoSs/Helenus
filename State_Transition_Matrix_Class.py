@@ -7,8 +7,8 @@ class State_Transition_Matrix:
 
     def get_predecessor_states(self, state):
         predecessors = []
-        for i in range(0, len(self.state_list)-1):
-            if self.matrix[i][self.state_list.index(state)] != '':
+        for i in range(0, len(self.state_list)):
+            if self.matrix[i][self.state_list.index(state)] != []:
                 predecessors.append(self.state_list[i])
         return predecessors
 
@@ -16,9 +16,9 @@ class State_Transition_Matrix:
     def delta_non_deterministic(self, matrix, state):
         next_states = []
         #print('delta n d')
-        for letter in matrix[self.state_list.index(state)]:
-            print(letter)
-            next_states.append(self.state_list[matrix[self.state_list.index(state)].index(letter)])
+        for letter_array in matrix[self.state_list.index(state)]:
+            print(letter_array)
+            next_states.append(self.state_list[matrix[self.state_list.index(state)].index(letter_array)])
             #print(next_states)
         #print('delta end')
         return next_states
@@ -28,17 +28,23 @@ class State_Transition_Matrix:
         if depth == 0:
             return ['']
 
-        #print('get_paths: ' + str(depth) + current_state)
+        print('get_paths: ' + str(depth) + current_state)
         paths = []
         for letter_pos in range(0, len(matrix[self.state_list.index(current_state)])):
-            if matrix[self.state_list.index(current_state)][letter_pos] != '':
-                letter = matrix[self.state_list.index(current_state)][letter_pos]
-                #print(letter)
-                next_state = self.state_list[letter_pos]
-                #print(next_state)
-                next_paths = self.get_paths(matrix, depth-1, next_state)
-                for next_path in next_paths:
-                    paths.append(next_path + letter)
+            print(letter_pos)
+            if matrix[self.state_list.index(current_state)][letter_pos] != []:
+                letters = matrix[self.state_list.index(current_state)][letter_pos]
+
+                for letter in letters:
+                    print(letter)
+                    next_state = self.state_list[letter_pos]
+                    print(next_state)
+                    next_paths = self.get_paths(matrix, depth-1, next_state)
+                    print(next_paths)
+                    for next_path in next_paths:
+                        print(next_path)
+                        print(letter)
+                        paths.append(next_path + letter)
         return paths
 
 
@@ -49,32 +55,38 @@ class State_Transition_Matrix:
 
 
     def insert_state(self, state):
-        self.matrix.append([])
-        for i in range(0, len(self.state_list)):
-            self.matrix[len(self.state_list)].append('')
-            print(self.matrix)
-
-        self.state_list.append(state)
-        for i in range(0, len(self.state_list)):
-            print(i)
-            print(self.matrix[i])
-            self.matrix[i].append('')
-            print(self.matrix)
-
+        #self.matrix.append([])
+        #for i in range(0, len(self.state_list)):
+        #    self.matrix[len(self.state_list)].append([])
+        #    print(self.matrix)
 
         #self.state_list.append(state)
-        #self.matrix.append([])
-        #print(self.matrix)
         #for i in range(0, len(self.state_list)):
-        #    self.matrix[self.state_list.index(state)].append('')
+        #    print(i)
+        #    print(self.matrix[i])
+        #    self.matrix[i].append([])
         #    print(self.matrix)
-        #    if i < len(self.state_list)-1:
-        #        self.matrix[i].append('')
-        #        print(self.matrix)
+
+
+        self.state_list.append(state)
+        self.matrix.append([])
+        print(self.matrix)
+        for i in range(0, len(self.state_list)):
+            self.matrix[self.state_list.index(state)].append([])
+            print(self.matrix)
+            if i < len(self.state_list)-1:
+                self.matrix[i].append([])
+                print(self.matrix)
 
 
     def delta(self, state, letter):
-        return self.state_list[self.matrix[self.state_list.index(state)].index(letter)]
+        row = self.matrix[self.state_list.index(state)]
+        if letter in row:
+            return self.state_list[row.index(letter)]
+        for col in row:
+            if letter in col:
+                return self.state_list[row.index(col)]
+
 
 
     def copy_delta(self, source, target):
@@ -99,4 +111,4 @@ class State_Transition_Matrix:
 
 
     def set_transition(self, source, target, letter):
-        self.matrix[self.state_list.index(source)][self.state_list.index(target)] = letter
+        self.matrix[self.state_list.index(source)][self.state_list.index(target)].append(letter)
