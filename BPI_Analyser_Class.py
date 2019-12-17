@@ -1,4 +1,5 @@
 import csv
+import copy
 
 
 class BPIAnalyser:
@@ -52,7 +53,7 @@ class BPIAnalyser:
 
     def train_matrix(self, dfa):
         # Copy original matrix + fill with 0
-        matrix = dfa.state_transition_matrix.matrix
+        matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
         for row in matrix:
             for col in row:
                 col.clear()
@@ -62,14 +63,16 @@ class BPIAnalyser:
         with open('data/hospital_log.csv') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=';')
             next(csv_reader)
-            current_state = dfa.start_state
+            current_state = dfa.start_state[0]
             training_count = 75000
             actual_training_count = 0
             for i in range(0, training_count):
                 row = next(csv_reader)
                 if row[1] in self.event_types:
                     actual_training_count += 1  # TODO: necessary because not all event types taken
-                    matrix[dfa.states.index(current_state[0])][self.event_types.index(row[1])][0] += 1
+                    next_state = dfa.delta(current_state, str(self.event_types.index(row[1])))
+                    matrix[dfa.states.index(current_state)][dfa.states.index(next_state)][0] += 1
+                    current_state = next_state
 
         # calculate percentage
         for row in matrix:
