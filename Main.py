@@ -16,6 +16,13 @@ def main():
     matrix1 = State_Transition_Matrix(states, alphabet, state_transition_matrix)
     dfa1 = DFA(states, start_state, alphabet, final_states, matrix1)
 
+    dfa1.increase_unambiguity(2)
+    assert dfa1.states.sort() == ['A', 'B', 'B2', 'Aba', 'B2ab'].sort()
+    assert dfa1.state_transition_matrix.matrix.sort() == [[['a'], [], [], [], ['b']], [[], ['b'], [], ['a'], []], [[], [], ['b'], ['a'], []], [['a'], [], [], [], ['b']], [[], [], ['b'], ['a'], []]].sort()
+
+    print('#########################################')
+    dfa1.increase_unambiguity(3)
+
     states = ['A', 'B']
     start_state = ['B']
     alphabet = ['a', 'b']
@@ -25,15 +32,6 @@ def main():
 
     matrix2 = State_Transition_Matrix(states, alphabet, state_transition_matrix)
     dfa2 = DFA(states, start_state, alphabet, final_states, matrix2)
-
-    ## make DFA iteratively unambiguous
-    #for i in range(1, order):
-    dfa1.increase_unambiguity(2)
-    print('#########################################')
-    dfa1.increase_unambiguity(3)
-
-    # train unambiguous dfa's matrix
-
 
 
 main()
