@@ -2,6 +2,7 @@ from State_Transition_Matrix_Class import State_Transition_Matrix
 from DFA_Class import DFA
 from operator import itemgetter
 from BPI_Analyser_Class import BPIAnalyser
+from Tester_Class import Tester
 
 
 def main():
@@ -18,10 +19,8 @@ def main():
     matrix1 = State_Transition_Matrix(states, alphabet, state_transition_matrix)
     dfa1 = DFA(states, start_state, alphabet, final_states, matrix1)
 
-    #dfa1.increase_unambiguity(2)
-    #assert sorted(dfa1.states) == sorted(['A', 'B', 'B2', 'Aba', 'B2ab'])
-    #assert sorted(dfa1.state_transition_matrix.matrix) == sorted([[['a'], [], [], [], ['b']], [[], ['b'], [], ['a'], []], [[], [], ['b'], ['a'], []], [['a'], [], [], [], ['b']], [[], [], ['b'], ['a'], []]])
-
+    dfa1.increase_unambiguity(2)
+    Tester.test_correct_unambiguity_2(dfa1)
     #print('#########################################')
     #dfa1.increase_unambiguity(3)
 
