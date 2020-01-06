@@ -1,7 +1,7 @@
 from State_Transition_Matrix_Class import State_Transition_Matrix
 from DFA_Class import DFA
 from operator import itemgetter
-from BPI_Analyser_Class import BPIAnalyser
+from Analyser_Class import BPIAnalyser
 from Tester_Class import Tester
 
 
@@ -44,7 +44,7 @@ def main():
     #
     # analyser = BPIAnalyser()
     # alphabet = analyser.get_alphabet()
-    # state_transition_matrix = analyser.get_matrix_GaFb(a, b)
+    # state_transition_matrix = analyser.get_matrix(a, b)
     #
     # matrix = State_Transition_Matrix(states, alphabet, state_transition_matrix)
     # dfa = DFA(states, start_state, alphabet, final_states, matrix)
@@ -53,7 +53,7 @@ def main():
     # print("Starting unambiguity 2")
     # dfa.increase_unambiguity(2)
     #
-    # analyser.train_matrix(dfa)
+    # analyser.train_matrix(dfa, 'data/hospital_log.csv', 75000)
     #
     # print(analyser.trained_matrix)
 
