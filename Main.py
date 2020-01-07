@@ -41,7 +41,6 @@ def main():
     dfa.increase_unambiguity(2)
 
     analyser.train_matrix(dfa, 'data/hospital_log.csv', 75000)
-
     print(analyser.trained_matrix)
 
 
