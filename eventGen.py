@@ -17,15 +17,16 @@ class Generator:
         print('\x1b[6;30;42m' + 'Success!' + '\x1b[0m')
 
     # should map on MC with order 1: (0 means non/accepting, 1 accepting)
+    # LTL: G(a -> Fb)
+
     #       1c  1b  0a  0c
     # 1c    0.6 0.2 0.2 0
     # 1b    0.4 0.3 0.3 0
     # 0a    0   0.1 0.7 0.2
     # 0c    0   0.2 0.2 0.6
     @staticmethod
-    def generate_abc_use_case():
+    def generate_abc_use_case(max_file_length):
         alphabet = ['a', 'b', 'c']
-        max_file_length = 1000
         with open('data/abc.csv', 'w+', newline='') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=';')
             file_length = 0
@@ -41,4 +42,4 @@ class Generator:
                 file_length += 1
 
 
-Generator.generate_abc_use_case()
+Generator.generate_abc_use_case(100000)

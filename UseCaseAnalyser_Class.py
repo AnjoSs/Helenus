@@ -46,9 +46,12 @@ class UseCaseAnalyser:
 
     def train_matrix(self, dfa, data_path, training_count):
         # Copy original matrix + fill with 0
+        # plus: save for each state how often it was visited to compute percentages
         matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
-        for next_event in matrix:
-            for col in next_event:
+        state_visits = []
+        for event in matrix:
+            state_visits.append(0)
+            for col in event:
                 col.clear()
                 col.append(0)
 
@@ -58,6 +61,7 @@ class UseCaseAnalyser:
             next(csv_reader)  # skip headline
             current_state = dfa.start_state[0]
             for i in range(0, training_count):
+                state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
                 next_event = next(csv_reader)
                 next_state = dfa.delta(current_state, next_event)
                 matrix[dfa.state_transition_matrix.state_list.index(current_state)][
@@ -65,9 +69,10 @@ class UseCaseAnalyser:
                 current_state = next_state
 
         # calculate percentage
-        for next_event in matrix:
-            for col in next_event:
-                col[0] = col[0] / training_count
+        for row in matrix:
+            for col in row:
+                if state_visits[matrix.index(row)] != 0:
+                    col[0] = col[0] / state_visits[matrix.index(row)]
 
         self.trained_matrix = matrix
         return
@@ -140,8 +145,11 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
 
     def train_matrix(self, dfa, data_path, training_count):
         # Copy original matrix + fill with 0
+        # plus: save for each state how often it was visited to compute percentages
         matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
+        state_visits = []
         for row in matrix:
+            state_visits.append(0)
             for col in row:
                 col.clear()
                 col.append(0)
@@ -151,11 +159,10 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
             csv_reader = csv.reader(csv_file, delimiter=';')
             next(csv_reader)
             current_state = dfa.start_state[0]
-            actual_training_count = 0
             for i in range(0, training_count):
                 row = next(csv_reader)
                 if row[1] in self.event_types:
-                    actual_training_count += 1  # TODO: necessary because not all event types taken
+                    state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
                     next_state = dfa.delta(current_state, str(self.event_types.index(row[1])))
                     matrix[dfa.state_transition_matrix.state_list.index(current_state)][
                         dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
@@ -164,10 +171,17 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
         # calculate percentage
         for row in matrix:
             for col in row:
-                col[0] = col[0] / actual_training_count
+                if state_visits[matrix.index(row)] != 0:
+                    col[0] = col[0] / state_visits[matrix.index(row)]
 
         self.trained_matrix = matrix
         return
+
+
+""" 
+LTL: G(a -> Fb) with alphabet [a,b,c]
+Input case already is of order 1.
+"""
 
 
 class ABCUseCaseAnalyser(UseCaseAnalyser):
@@ -175,21 +189,25 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
         super().__init__()
 
     def get_states(self):
-        pass  # TODO
+        return ["1c", "1b", "0a", "0c"]
 
     def get_final_states(self):
-        pass  # TODO
+        return ["1c", "1b"]
 
     def get_start_state(self):
-        pass  # TODO
+        return ["1c"]
 
     def get_alphabet(self):
-        # TODO belongs to what LTL?
         return ['a', 'b', 'c']
 
+    #       1c  1b  0a  0c
+    # 1c    c   b   a
+    # 1b    c   b   a
+    # 0a        b   a   c
+    # 0c        b   a   c
     def get_matrix(self):
-        # TODO belongs to what LTL?
-        return
-
-    def train_matrix(self, dfa, data_path, training_count):
-        pass  # TODO
+        matrix = [[["c"], ["b"], ["a"], []],
+                  [["c"], ["b"], ["a"], []],
+                  [[], ["b"], ["a"], ["c"]],
+                  [[], ["b"], ["a"], ["c"]]]
+        return State_Transition_Matrix(self.states, self.alphabet, matrix)
