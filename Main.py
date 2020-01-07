@@ -1,6 +1,6 @@
 from State_Transition_Matrix_Class import State_Transition_Matrix
 from DFA_Class import DFA
-from Analyser_Class import BPIAnalyser
+from UseCaseAnalyser_Class import BPIUseCaseAnalyser
 from Tester_Class import Tester
 
 
@@ -33,7 +33,7 @@ def main():
 
 ################################################################################
 
-    analyser = BPIAnalyser()
+    analyser = BPIUseCaseAnalyser()
     dfa = analyser.get_dfa()
     print("Starting unambiguity 1")
     dfa.increase_unambiguity(1)

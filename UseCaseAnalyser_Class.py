@@ -7,7 +7,7 @@ from DFA_Class import DFA
 from State_Transition_Matrix_Class import State_Transition_Matrix
 
 
-class Analyser:
+class UseCaseAnalyser:
     def __init__(self):
         super().__init__()
         self.states = self.get_states()
@@ -50,11 +50,11 @@ class Analyser:
 
 
 """
-An Analyser especially for the BPI2011 challenge. With LTL: G(a -> Fb)
+An UseCaseAnalyser especially for the BPI2011 challenge. With LTL: G(a -> Fb)
 Special here: event types and alphabet are no the same thing.
 We take event types from the log, e.g. "cea - tumormarker mbv meia" and take their index as alphabet.
 """
-class BPIAnalyser(Analyser):
+class BPIUseCaseAnalyser(UseCaseAnalyser):
     def __init__(self):
         super().__init__()
         self.a = "cea - tumormarker mbv meia"
@@ -142,7 +142,7 @@ class BPIAnalyser(Analyser):
         return
 
 
-class ABCAnalyser(Analyser):
+class ABCUseCaseAnalyser(UseCaseAnalyser):
     def __init__(self):
         super().__init__()
 
