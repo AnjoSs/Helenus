@@ -33,24 +33,25 @@ def main():
 
 ################################################################################
 
-    # analyser = BPIUseCaseAnalyser()
-    # dfa = analyser.get_dfa()
-    # print("Starting unambiguity 1")
-    # dfa.increase_unambiguity(1)
-    # print("Starting unambiguity 2")
-    # dfa.increase_unambiguity(2)
-    #
-    # analyser.train_matrix(dfa, 'data/hospital_log.csv', 75000)
-    # print(analyser.trained_matrix)
-
-    abc_analyser = ABCUseCaseAnalyser()
-    dfa = abc_analyser.get_dfa()
+    analyser = BPIUseCaseAnalyser()
+    dfa = analyser.get_dfa()
     print("Starting unambiguity 1")
-    dfa.increase_unambiguity(1)  # should not change anything
-    print(dfa.state_transition_matrix.matrix)
+    dfa.increase_unambiguity(1)
+    print("Starting unambiguity 2")
+    dfa.increase_unambiguity(2)
 
-    abc_analyser.train_matrix(dfa, 'data/abc.csv', 999999)
-    Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
+    analyser.train_matrix(dfa, 'data/hospital_log.csv', 75000)
+    print(analyser.trained_matrix)
+    Tester.test_correct_trained_matrix_bpi11(analyser.trained_matrix)
+
+    # abc_analyser = ABCUseCaseAnalyser()
+    # dfa = abc_analyser.get_dfa()
+    # print("Starting unambiguity 1")
+    # dfa.increase_unambiguity(1)  # should not change anything
+    # print(dfa.state_transition_matrix.matrix)
+    #
+    # abc_analyser.train_matrix(dfa, 'data/abc.csv', 999999)
+    # Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
 
 
 main()

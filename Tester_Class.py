@@ -65,3 +65,11 @@ class Tester:
         assert(round(trained_matrix[3][1][0], 1) == 0.2)
         assert(round(trained_matrix[3][2][0], 1) == 0.2)
         assert(round(trained_matrix[3][3][0], 1) == 0.6)
+
+    @staticmethod
+    def test_correct_trained_matrix_bpi11(trained_matrix):
+        for row in trained_matrix:
+            percentage_sum = 0
+            for col in row:
+                percentage_sum += col[0]
+            assert(round(percentage_sum, 3) == 1.0 or percentage_sum == 0)

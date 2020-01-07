@@ -61,7 +61,7 @@ class UseCaseAnalyser:
             next(csv_reader)  # skip headline
             current_state = dfa.start_state[0]
             for i in range(0, training_count):
-                state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1  # TODO evtl noch einmal davor oder danach f[r erstes& letytes event
+                state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
                 next_event = next(csv_reader)
                 next_state = dfa.delta(current_state, next_event)
                 matrix[dfa.state_transition_matrix.state_list.index(current_state)][
@@ -71,7 +71,8 @@ class UseCaseAnalyser:
         # calculate percentage
         for row in matrix:
             for col in row:
-                col[0] = col[0] / state_visits[matrix.index(row)]
+                if state_visits[matrix.index(row)] != 0:
+                    col[0] = col[0] / state_visits[matrix.index(row)]
 
         self.trained_matrix = matrix
         return
@@ -144,8 +145,11 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
 
     def train_matrix(self, dfa, data_path, training_count):
         # Copy original matrix + fill with 0
+        # plus: save for each state how often it was visited to compute percentages
         matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
+        state_visits = []
         for row in matrix:
+            state_visits.append(0)
             for col in row:
                 col.clear()
                 col.append(0)
@@ -155,11 +159,10 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
             csv_reader = csv.reader(csv_file, delimiter=';')
             next(csv_reader)
             current_state = dfa.start_state[0]
-            actual_training_count = 0
             for i in range(0, training_count):
                 row = next(csv_reader)
                 if row[1] in self.event_types:
-                    actual_training_count += 1  # TODO: necessary because not all event types taken
+                    state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
                     next_state = dfa.delta(current_state, str(self.event_types.index(row[1])))
                     matrix[dfa.state_transition_matrix.state_list.index(current_state)][
                         dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
@@ -168,7 +171,8 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
         # calculate percentage
         for row in matrix:
             for col in row:
-                col[0] = col[0] / actual_training_count
+                if state_visits[matrix.index(row)] != 0:
+                    col[0] = col[0] / state_visits[matrix.index(row)]
 
         self.trained_matrix = matrix
         return
