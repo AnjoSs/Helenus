@@ -9,7 +9,7 @@ class DFA:
     def get_predecessor_states(self, state):
         return self.state_transition_matrix.get_predecessor_states(state)
 
-    def get_prepaths(self, depth, current_state): # wtf is the target?
+    def get_prepaths(self, depth, current_state):
         return self.state_transition_matrix.get_prepaths(depth, current_state)
 
     def insert_state(self, state):

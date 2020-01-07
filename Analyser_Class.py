@@ -2,24 +2,115 @@ import csv
 import copy
 import abc
 
-# Use BPI challenge 2019 --> only 42 event types
+# TODO: Use BPI challenge 2019 --> only 42 event types
+from DFA_Class import DFA
+from State_Transition_Matrix_Class import State_Transition_Matrix
+
+
 class Analyser:
     def __init__(self):
-        self.event_types = self.get_event_types()
+        super().__init__()
+        self.states = self.get_states()
+        self.start_state = self.get_start_state()
+        self.final_states = self.get_final_states()
+        self.alphabet = self.get_alphabet()
         self.trained_matrix = {}
+            
+    @abc.abstractmethod
+    def get_states(self):
+        pass
 
     @abc.abstractmethod
-    def get_event_types(self):
-        return
+    def get_final_states(self):
+        pass
 
+    @abc.abstractmethod
+    def get_start_state(self):
+        pass
+    
     @abc.abstractmethod
     def get_matrix(self):
-        return
+        pass
 
     @abc.abstractmethod
     def get_alphabet(self):
-        return
+        pass
 
+    def get_dfa(self):
+        states = self.get_states()
+        start_state = self.get_start_state()
+        final_states = self.get_final_states()
+        alphabet = self.get_alphabet()
+        matrix = self.get_matrix()
+        return DFA(states, start_state, alphabet, final_states, matrix)
+
+    @abc.abstractmethod
+    def train_matrix(self, dfa, data_path, training_count):
+        pass
+
+
+"""
+An Analyser especially for the BPI2011 challenge. With LTL: G(a -> Fb)
+Special here: event types and alphabet are no the same thing.
+We take event types from the log, e.g. "cea - tumormarker mbv meia" and take their index as alphabet.
+"""
+class BPIAnalyser(Analyser):
+    def __init__(self):
+        super().__init__()
+        self.a = "cea - tumormarker mbv meia"
+        self.b = "squamous cell carcinoma mbv eia"
+        self.event_types = self.get_event_types()
+
+    def get_states(self):
+        return ["A", "B"]
+    
+    def get_final_states(self):
+        return ["B"]
+
+    def get_start_state(self):
+        return ["B"]
+
+    def get_event_types(self):
+        with open('data/hospital_log.csv') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=';')
+            next(csv_reader)
+            event_types = []
+            while len(event_types) < 8:
+                row = next(csv_reader)
+                if row[1] not in event_types:
+                    event_types.append(row[1])
+
+            # TODO change back to this if all event types wanted:
+            #for row in csv_reader:
+            #    if row[1] not in event_types:
+            #        event_types.append(row[1])
+                    # if 'squamous' in row[1]:
+                    #    print(row[1])
+            if self.a not in event_types:
+                event_types.append(self.a)
+            if self.b not in event_types:
+                event_types.append(self.b)
+
+        # print("Event Types: " + str(event_types))
+        # print("Event Count: " + str(count))
+        return event_types
+
+    def get_alphabet(self):
+        # TODO: ATTENTION: only taking a few event types!
+        return range(0, 10)
+    
+    def get_matrix(self):
+        row_AA = []
+        row_BB = []
+        for event in self.event_types:
+            if event != self.b:
+                row_AA.append(str(self.event_types.index(event)))
+            if event != self.a:
+                row_BB.append(str(self.event_types.index(event)))
+
+        state_transition_matrix = [[row_AA, [str(self.event_types.index(self.b))]], [row_BB, [str(self.event_types.index(self.a))]]]
+        return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
+    
     def train_matrix(self, dfa, data_path, training_count):
         # Copy original matrix + fill with 0
         matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
@@ -39,7 +130,7 @@ class Analyser:
                 if row[1] in self.event_types:
                     actual_training_count += 1  # TODO: necessary because not all event types taken
                     next_state = dfa.delta(current_state, str(self.event_types.index(row[1])))
-                    matrix[dfa.states.index(current_state)][dfa.states.index(next_state)][0] += 1
+                    matrix[dfa.state_transition_matrix.state_list.index(current_state)][dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
                     current_state = next_state
 
         # calculate percentage
@@ -51,55 +142,26 @@ class Analyser:
         return
 
 
-"""An Analyser especially for the BPI2011 challenge. With LTL: G(a -> Fb)"""
-class BPIAnalyser(Analyser):
+class ABCAnalyser(Analyser):
     def __init__(self):
         super().__init__()
-        self.event_types = self.get_event_types()
-        self.trained_matrix = {}
 
-    def get_event_types(self):
-        with open('data/hospital_log.csv') as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=';')
-            next(csv_reader)
-            event_types = []
-            while len(event_types) < 8:
-                row = next(csv_reader)
-                if row[1] not in event_types:
-                    event_types.append(row[1])
+    def get_states(self):
+        pass  # TODO
 
-            # TODO change back to this if all event types wanted:
-            #for row in csv_reader:
-            #    if row[1] not in event_types:
-            #        event_types.append(row[1])
-                    # if 'squamous' in row[1]:
-                    #    print(row[1])
-            a = "cea - tumormarker mbv meia"
-            b = "squamous cell carcinoma mbv eia"
-            if a not in event_types:
-                event_types.append(a)
-            if b not in event_types:
-                event_types.append(b)
+    def get_final_states(self):
+        pass  # TODO
 
-        print("Event Types: " + str(event_types))
-        #print("Event Count: " + str(count))
-        self.event_types = event_types
-        return event_types
-
-    def get_matrix(self, a, b):
-        row_AA = []
-        row_BB = []
-        for event in self.event_types:
-            if event != b:
-                row_AA.append(str(self.event_types.index(event)))
-            if event != a:
-                row_BB.append(str(self.event_types.index(event)))
-
-        state_transition_matrix = [[row_AA, [str(self.event_types.index(b))]], [row_BB, [str(self.event_types.index(a))]]]
-        return state_transition_matrix
+    def get_start_state(self):
+        pass  # TODO
 
     def get_alphabet(self):
-        # TODO: ATTENTION: only taking a few event types!
-        return range(0, 10)
+        # TODO belongs to what LTL?
+        return ['a', 'b', 'c']
 
+    def get_matrix(self):
+        # TODO belongs to what LTL?
+        return
 
+    def train_matrix(self, dfa, data_path, training_count):
+        pass  # TODO
