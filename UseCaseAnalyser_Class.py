@@ -14,6 +14,7 @@ class UseCaseAnalyser:
         self.start_state = self.get_start_state()
         self.final_states = self.get_final_states()
         self.alphabet = self.get_alphabet()
+        self.initial_matrix = self.get_matrix()
         self.trained_matrix = {}
 
     @abc.abstractmethod
@@ -37,12 +38,7 @@ class UseCaseAnalyser:
         pass
 
     def get_dfa(self):
-        states = self.get_states()
-        start_state = self.get_start_state()
-        final_states = self.get_final_states()
-        alphabet = self.get_alphabet()
-        matrix = self.get_matrix()
-        return DFA(states, start_state, alphabet, final_states, matrix)
+        return DFA(self.states, self.start_state, self.alphabet, self.final_states, self.initial_matrix)
 
     def train_matrix(self, dfa, data_path, training_count):
         # Copy original matrix + fill with 0
@@ -139,6 +135,7 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
             if event != self.a:
                 row_BB.append(str(self.event_types.index(event)))
 
+        # TODO I think this is wrong. row_BB should be in [1][1] not [1][0]
         state_transition_matrix = [[row_AA, [str(self.event_types.index(self.b))]],
                                    [row_BB, [str(self.event_types.index(self.a))]]]
         return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
@@ -211,3 +208,94 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
                   [[], ["b"], ["a"], ["c"]],
                   [[], ["b"], ["a"], ["c"]]]
         return State_Transition_Matrix(self.states, self.alphabet, matrix)
+
+
+"""
+BPI 2019 Challenge
+LTL: F('SRM: Transfer Failed (E.Sys.)') == Fa
+initial order 0
+"""
+
+
+class BPI19UseCaseAnalyser(UseCaseAnalyser):
+    def __init__(self):
+        self.a = 'SRM: Transfer Failed (E.Sys.)'
+        self.event_types = self.get_event_types()
+        super().__init__()
+
+    @abc.abstractmethod
+    def get_states(self):
+        return ["no", "yes"]
+
+    @abc.abstractmethod
+    def get_final_states(self):
+        return ["yes"]
+
+    @abc.abstractmethod
+    def get_start_state(self):
+        return ["no"]
+
+    @abc.abstractmethod
+    def get_matrix(self):
+        cell_no_no = []
+        cell_yes_yes = []
+        for event in self.event_types:
+            if event != self.a:
+                cell_no_no.append(str(self.event_types.index(event)))
+            cell_yes_yes.append(str(self.event_types.index(event)))
+        state_transition_matrix = [[cell_no_no, [str(self.event_types.index(self.a))]],
+                                   [[], cell_yes_yes]]
+        return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
+
+    @abc.abstractmethod
+    def get_alphabet(self):
+        return self.event_types
+
+    @staticmethod
+    def get_event_types():
+        with open('data/bpi19.csv') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            next(csv_reader)
+            event_types = []
+            count = 0
+            for row in csv_reader:
+                if row[19] not in event_types:
+                    event_types.append(row[19])
+                    count += 1
+
+        print("Event Types: " + str(event_types))
+        print("Event Count: " + str(count))
+        return event_types
+
+    def train_matrix(self, dfa, data_path, training_count):
+        # Copy original matrix + fill with 0
+        # plus: save for each state how often it was visited to compute percentages
+        matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
+        state_visits = []
+        for event in matrix:
+            state_visits.append(0)
+            for col in event:
+                col.clear()
+                col.append(0)
+
+        # replay log entries + count transitions
+        with open(data_path) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            next(csv_reader)  # skip headline
+            current_state = dfa.start_state[0]
+            for i in range(0, training_count):
+                state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
+                next_event = str(self.event_types.index(next(csv_reader)[19]))
+                next_state = dfa.delta(current_state, next_event)
+                matrix[dfa.state_transition_matrix.state_list.index(current_state)][
+                    dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
+                current_state = next_state
+
+        # calculate percentage
+        for row in matrix:
+            for col in row:
+                if state_visits[matrix.index(row)] != 0:
+                    col[0] = col[0] / state_visits[matrix.index(row)]
+
+        self.trained_matrix = matrix
+        return

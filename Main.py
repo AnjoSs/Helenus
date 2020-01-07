@@ -1,6 +1,6 @@
 from State_Transition_Matrix_Class import State_Transition_Matrix
 from DFA_Class import DFA
-from UseCaseAnalyser_Class import BPIUseCaseAnalyser, ABCUseCaseAnalyser
+from UseCaseAnalyser_Class import BPIUseCaseAnalyser, ABCUseCaseAnalyser, BPI19UseCaseAnalyser
 from Tester_Class import Tester
 
 
@@ -33,16 +33,16 @@ def main():
 
 ################################################################################
 
-    analyser = BPIUseCaseAnalyser()
-    dfa = analyser.get_dfa()
-    print("Starting unambiguity 1")
-    dfa.increase_unambiguity(1)
-    print("Starting unambiguity 2")
-    dfa.increase_unambiguity(2)
-
-    analyser.train_matrix(dfa, 'data/hospital_log.csv', 75000)
-    print(analyser.trained_matrix)
-    Tester.test_correct_trained_matrix_bpi11(analyser.trained_matrix)
+    # analyser = BPIUseCaseAnalyser()
+    # dfa = analyser.get_dfa()
+    # print("Starting unambiguity 1")
+    # dfa.increase_unambiguity(1)
+    # print("Starting unambiguity 2")
+    # dfa.increase_unambiguity(2)
+    #
+    # analyser.train_matrix(dfa, 'data/hospital_log.csv', 75000)
+    # print(analyser.trained_matrix)
+    # Tester.test_correct_trained_matrix_bpi11(analyser.trained_matrix)
 
     # abc_analyser = ABCUseCaseAnalyser()
     # dfa = abc_analyser.get_dfa()
@@ -52,6 +52,14 @@ def main():
     #
     # abc_analyser.train_matrix(dfa, 'data/abc.csv', 999999)
     # Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
+
+    bpi19_analyser = BPI19UseCaseAnalyser()
+    dfa_bpi19 = bpi19_analyser.get_dfa()
+    dfa_bpi19.increase_unambiguity(1)
+    print(dfa_bpi19.state_transition_matrix.state_list)
+    bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', 1000)
+    print(bpi19_analyser.trained_matrix)
+    Tester.test_correct_trained_matrix_bpi19(bpi19_analyser.trained_matrix)
 
 
 main()

@@ -73,3 +73,11 @@ class Tester:
             for col in row:
                 percentage_sum += col[0]
             assert(round(percentage_sum, 3) == 1.0 or percentage_sum == 0)
+
+    @staticmethod
+    def test_correct_trained_matrix_bpi19(trained_matrix):
+        for row in trained_matrix:
+            percentage_sum = 0
+            for col in row:
+                percentage_sum += col[0]
+            assert (round(percentage_sum, 3) == 1.0 or percentage_sum == 0)
