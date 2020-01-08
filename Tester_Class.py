@@ -47,7 +47,7 @@ class Tester:
             percentage_sum = 0
             for col in row:
                 percentage_sum += col[0]
-            assert(percentage_sum == 1.0)
+            assert(round(percentage_sum, 3) == 1.0)
 
         assert(round(trained_matrix[0][0][0], 1) == 0.6)
         assert(round(trained_matrix[0][1][0], 1) == 0.2)

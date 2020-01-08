@@ -76,17 +76,17 @@ class UseCaseAnalyser:
 
 """
 An UseCaseAnalyser especially for the BPI2011 challenge. With LTL: G(a -> Fb)
-Special here: event types and alphabet are no the same thing.
+Special here: event types and alphabet are not the same thing.
 We take event types from the log, e.g. "cea - tumormarker mbv meia" and take their index as alphabet.
 """
 
 
 class BPIUseCaseAnalyser(UseCaseAnalyser):
     def __init__(self):
-        super().__init__()
         self.a = "cea - tumormarker mbv meia"
         self.b = "squamous cell carcinoma mbv eia"
         self.event_types = self.get_event_types()
+        super().__init__()
 
     def get_states(self):
         return ["A", "B"]
@@ -135,9 +135,8 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
             if event != self.a:
                 row_BB.append(str(self.event_types.index(event)))
 
-        # TODO I think this is wrong. row_BB should be in [1][1] not [1][0]
         state_transition_matrix = [[row_AA, [str(self.event_types.index(self.b))]],
-                                   [row_BB, [str(self.event_types.index(self.a))]]]
+                                   [[str(self.event_types.index(self.a))], row_BB]]
         return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
 
     def train_matrix(self, dfa, data_path, training_count):
@@ -179,33 +178,23 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
             csv_reader = csv.reader(csv_file, delimiter=';')
             next(csv_reader)
             current_state = dfa.start_state[0]
-            counter = 0
 
             # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
             threshold = 0.8
 
-            # precision = 0 #calculate precision in the end
-            # precision_lookup = [] #has tuples (int:counter, int:spread, bool:correct_prediction)
-            # active_precision_lookups = []
+            # skip unwanted log entries
+            for i in range(0, log_begin):
+                next(csv_reader)
 
             for i in range(log_begin, log_end):
-                row = next(csv_reader)
-                new_state = dfa.delta(current_state, str(self.event_types.index(row[1])))
+                current_event = next(csv_reader)
+                new_state = dfa.delta(current_state, str(self.event_types.index(current_event[1])))
 
                 spread = self.find_spread(0, 1, threshold, new_state)  # tbd!!!
 
-                # TODO: write it in a log file !!!
-
-                # precision_lookup.append([counter, spread, false])
-                # active_precision_lookups.append(counter)
-
-                # for event in active_precision_lookups:
-                #    if counter == event + precision_lookup[event][1]:
-                #       active_precision_lookups.remove(event)
-                #    if new_state in self.final_states:
-                #       precision_lookup[event][2] = true
-
-                counter += 1
+                csv_writer = csv.writer(open('/results/bpi11.csv'))
+                csv_writer.writerow(current_state, current_event, new_state, spread)
+                current_state = new_state
         return
 
     def find_spread(self, depth, current_probability, bound, current_state):
