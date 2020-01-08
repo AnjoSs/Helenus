@@ -174,8 +174,65 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
         self.trained_matrix = matrix
         return
 
+    def predict_matrix(self, dfa, data_path, log_begin, log_end):
+          with open(data_path) as csv_file:
+              csv_reader = csv.reader(csv_file, delimiter=';')
+              next(csv_reader)
+              current_state = dfa.start_state[0]
+              counter = 0
 
-""" 
+              #iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
+              threshold = 0,8
+
+              #precision = 0 #calculate precision in the end
+              #precision_lookup = [] #has tuples (int:counter, int:spread, bool:correct_prediction)
+              #active_precision_lookups = []
+
+              for i in range(log_begin, log_end):
+                  row = next(csv_reader)
+
+                  new_state = dfa.delta(current_state, str(self.event_types.index(row[1])))
+
+                  spread = find_spread(0, 1, bound, new_state) #tbd!!!
+
+                  # TODO: write it in a log file !!!
+
+                  #precision_lookup.append([counter, spread, false])
+                  #active_precision_lookups.append(counter)
+
+                  #for event in active_precision_lookups:
+                  #    if counter == event + precision_lookup[event][1]:
+                  #        active_precision_lookups.remove(event)
+                  #    if new_state in self.final_states:
+                  #        precision_lookup[event][2] = true
+
+
+                  counter += 1
+
+
+
+          return
+
+      def find_spread(depth, current_probabilitiy, bound, current_state):
+          #Input: matrix, current_state, threshold, max_distance
+          states_to_investigate = []
+          for probability in self.trained_matrix[state_list.index(current_state)]:
+
+              if self.trained_matrix != 0:
+                  next_state = dfa.delta(current_state, str(self.event_types.index(row[1])))
+
+                  if next_state in self.final_states:
+                      current_probabilitiy = current_probabilitiy + current_probabilitiy*probability
+
+                  if next_state not in self.final_states:
+                      states_to_investigate.append(next_state)
+
+          if current_probabilitiy >= bound:
+                  return depth+1
+
+
+
+"""
 LTL: G(a -> Fb) with alphabet [a,b,c]
 Input case already is of order 1.
 """
