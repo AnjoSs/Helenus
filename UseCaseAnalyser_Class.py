@@ -16,6 +16,7 @@ class UseCaseAnalyser:
         self.alphabet = self.get_alphabet()
         self.initial_matrix = self.get_matrix()
         self.trained_matrix = {}
+        self.delimiter = ';'
 
     @abc.abstractmethod
     def get_states(self):
@@ -37,6 +38,10 @@ class UseCaseAnalyser:
     def get_alphabet(self):
         pass
 
+    @abc.abstractmethod
+    def access_event(self, row):
+        pass
+
     def get_dfa(self):
         return DFA(self.states, self.start_state, self.alphabet, self.final_states, self.initial_matrix)
 
@@ -53,12 +58,12 @@ class UseCaseAnalyser:
 
         # replay log entries + count transitions
         with open(data_path) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=';')
+            csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
             next(csv_reader)  # skip headline
             current_state = dfa.start_state[0]
             for i in range(0, training_count):
                 state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
-                next_event = next(csv_reader)
+                next_event = self.access_event(next(csv_reader))
                 next_state = dfa.delta(current_state, next_event)
                 matrix[dfa.state_transition_matrix.state_list.index(current_state)][
                     dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
@@ -132,9 +137,6 @@ class UseCaseAnalyser:
                     precision_score.append(prediction_correct)
             return sum(precision_score)/len(precision_score)
 
-
-
-
 """
 An UseCaseAnalyser especially for the BPI2011 challenge. With LTL: G(a -> Fb)
 Special here: event types and alphabet are not the same thing.
@@ -199,6 +201,9 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
         state_transition_matrix = [[row_AA, [str(self.event_types.index(self.b))]],
                                    [[str(self.event_types.index(self.a))], row_BB]]
         return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
+
+    def access_event(self, row):
+        return
 
     def train_matrix(self, dfa, data_path, training_count):
         # Copy original matrix + fill with 0
@@ -300,6 +305,9 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
     def get_alphabet(self):
         return ['a', 'b', 'c']
 
+    def access_event(self, row):
+        return row[0]
+
     #       1c  1b  0a  0c
     # 1c    c   b   a
     # 1b    c   b   a
@@ -349,20 +357,17 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
         self.a = 'SRM: Transfer Failed (E.Sys.)'
         self.event_types = self.get_event_types()
         super().__init__()
+        self.delimiter = ','
 
-    @abc.abstractmethod
     def get_states(self):
         return ["no", "yes"]
 
-    @abc.abstractmethod
     def get_final_states(self):
         return ["yes"]
 
-    @abc.abstractmethod
     def get_start_state(self):
         return ["no"]
 
-    @abc.abstractmethod
     def get_matrix(self):
         cell_no_no = []
         cell_yes_yes = []
@@ -374,9 +379,11 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
                                    [[], cell_yes_yes]]
         return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
 
-    @abc.abstractmethod
     def get_alphabet(self):
         return self.event_types
+
+    def access_event(self, row):
+        return str(self.event_types.index(row[19]))
 
     @staticmethod
     def get_event_types():
@@ -393,39 +400,6 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
         print("Event Types: " + str(event_types))
         print("Event Count: " + str(count))
         return event_types
-
-    def train_matrix(self, dfa, data_path, training_count):
-        # Copy original matrix + fill with 0
-        # plus: save for each state how often it was visited to compute percentages
-        matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
-        state_visits = []
-        for event in matrix:
-            state_visits.append(0)
-            for col in event:
-                col.clear()
-                col.append(0)
-
-        # replay log entries + count transitions
-        with open(data_path) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            next(csv_reader)  # skip headline
-            current_state = dfa.start_state[0]
-            for i in range(0, training_count):
-                state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
-                next_event = str(self.event_types.index(next(csv_reader)[19]))
-                next_state = dfa.delta(current_state, next_event)
-                matrix[dfa.state_transition_matrix.state_list.index(current_state)][
-                    dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
-                current_state = next_state
-
-        # calculate percentage
-        for row in matrix:
-            for col in row:
-                if state_visits[matrix.index(row)] != 0:
-                    col[0] = col[0] / state_visits[matrix.index(row)]
-
-        self.trained_matrix = matrix
-        return
 
     def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path):
         with open(data_path) as csv_file:

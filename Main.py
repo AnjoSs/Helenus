@@ -37,32 +37,32 @@ def main():
     """ BPI11 use case"""
     # TODO something is wrong with this use case. if unambiguity is 2, the percentage per row is not 1.
     # probably due to not taking all event types and thus missing state transitions
-    # analyser = BPIUseCaseAnalyser()
-    # dfa = analyser.get_dfa()
-    # print("Starting unambiguity 1")
-    # dfa.increase_unambiguity(1)
-    # Tester.test_correct_dfa_bpi11(dfa)
+    analyser = BPIUseCaseAnalyser()
+    dfa = analyser.get_dfa()
+    print("Starting unambiguity 1")
+    dfa.increase_unambiguity(1)
+    Tester.test_correct_dfa_bpi11(dfa)
     # print("Starting unambiguity 2")
     # dfa.increase_unambiguity(2)
-    # Tester.test_correct_dfa_bpi11(dfa)
-    #
-    # analyser.train_matrix(dfa, 'data/hospital_log.csv', 75000)
-    # print(dfa.state_transition_matrix.matrix)
-    # print(analyser.trained_matrix)
-    # Tester.test_correct_trained_matrix_bpi11(analyser.trained_matrix, dfa)
+    Tester.test_correct_dfa_bpi11(dfa)
+
+    analyser.train_matrix(dfa, 'data/hospital_log.csv', 75000)
+    print(dfa.state_transition_matrix.matrix)
+    print(analyser.trained_matrix)
+    Tester.test_correct_trained_matrix_bpi11(analyser.trained_matrix, dfa)
 
     """ ABC use case for testing """
-    abc_analyser = ABCUseCaseAnalyser()
-    dfa = abc_analyser.get_dfa()
-    print("Starting unambiguity 1")
-    dfa.increase_unambiguity(1)  # should not change anything
-    print(dfa.state_transition_matrix.matrix)
-
-    abc_analyser.train_matrix(dfa, 'data/abc.csv', 999)
-    Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
-    abc_analyser.predict_matrix(dfa, 'data/abc.csv', 0, 100, 'results/abc.csv')
-    p = abc_analyser.get_precision('data/abc.csv', 'results/abc.csv', 0, 100)
-    print(p)
+    # abc_analyser = ABCUseCaseAnalyser()
+    # dfa = abc_analyser.get_dfa()
+    # print("Starting unambiguity 1")
+    # dfa.increase_unambiguity(1)  # should not change anything
+    # print(dfa.state_transition_matrix.matrix)
+    #
+    # abc_analyser.train_matrix(dfa, 'data/abc.csv', 999)
+    # Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
+    # abc_analyser.predict_matrix(dfa, 'data/abc.csv', 0, 100, 'results/abc.csv')
+    # p = abc_analyser.get_precision('data/abc.csv', 'results/abc.csv', 0, 100)
+    # print(p)
 
     """ BPI19 use case """
     # bpi19_analyser = BPI19UseCaseAnalyser()
