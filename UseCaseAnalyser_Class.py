@@ -83,8 +83,6 @@ class UseCaseAnalyser:
             csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
             next(csv_reader)
             current_state = dfa.start_state[0]
-
-            # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
             threshold = 0.8
 
             # skip unwanted log entries
@@ -97,6 +95,8 @@ class UseCaseAnalyser:
                     current_event = next(csv_reader)
                     new_state = dfa.delta(current_state, self.access_event(current_event))
 
+                    # iterate over events and predict the shortest path that leads to an accepting state
+                    # with p > threshold
                     spread = self.find_spread(0, 1, threshold, new_state)
 
                     csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
@@ -136,6 +136,7 @@ class UseCaseAnalyser:
                             break
                     precision_score.append(prediction_correct)
             return sum(precision_score)/len(precision_score)
+
 
 """
 An UseCaseAnalyser especially for the BPI2011 challenge. With LTL: G(a -> Fb)

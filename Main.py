@@ -49,37 +49,37 @@ def main():
     # Tester.test_correct_dfa_bpi11(dfa)
 
     analyser.train_matrix(dfa, data_path, 75000)
-    Tester.test_correct_trained_matrix_bpi11(analyser.trained_matrix, dfa)
+    Tester.test_correct_trained_matrix_bpi11(analyser.trained_matrix)
     analyser.predict_matrix(dfa, data_path, 1, 10000, pred_path)
     p = analyser.get_precision(data_path, pred_path, 1, 200)
     print(p)
 
     """ ABC use case for testing """
-    # abc_analyser = ABCUseCaseAnalyser()
-    # dfa = abc_analyser.get_dfa()
-    # print("Starting unambiguity 1")
-    # dfa.increase_unambiguity(1)  # should not change anything
-    # print(dfa.state_transition_matrix.matrix)
-    #
-    # abc_analyser.train_matrix(dfa, 'data/abc.csv', 999)
-    # Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
-    # abc_analyser.predict_matrix(dfa, 'data/abc.csv', 0, 100, 'results/abc.csv')
-    # p = abc_analyser.get_precision('data/abc.csv', 'results/abc.csv', 0, 100)
-    # print(p)
+    abc_analyser = ABCUseCaseAnalyser()
+    dfa = abc_analyser.get_dfa()
+    print("Starting unambiguity 1")
+    dfa.increase_unambiguity(1)  # should not change anything
+    print(dfa.state_transition_matrix.matrix)
+
+    abc_analyser.train_matrix(dfa, 'data/abc.csv', 999)
+    Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
+    abc_analyser.predict_matrix(dfa, 'data/abc.csv', 0, 100, 'results/abc.csv')
+    p = abc_analyser.get_precision('data/abc.csv', 'results/abc.csv', 0, 100)
+    print(p)
 
     """ BPI19 use case """
-    # bpi19_analyser = BPI19UseCaseAnalyser()
-    # dfa_bpi19 = bpi19_analyser.get_dfa()
-    #
-    # dfa_bpi19.increase_unambiguity(1)
-    # # dfa_bpi19.increase_unambiguity(2)  # TODO takes ages!
-    # print("Starting training")
-    # bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', 1000)
-    # Tester.test_correct_trained_matrix_bpi19(bpi19_analyser.trained_matrix)
-    # print("Starting prediction")
-    # bpi19_analyser.predict_matrix(dfa_bpi19, 'data/bpi19.csv', 1, 200, 'results/bpi19.csv')
-    # precision = bpi19_analyser.get_precision('data/bpi19.csv', 'results/bpi19.csv', 0, 199)
-    # print(precision)
+    bpi19_analyser = BPI19UseCaseAnalyser()
+    dfa_bpi19 = bpi19_analyser.get_dfa()
+
+    dfa_bpi19.increase_unambiguity(1)
+    # dfa_bpi19.increase_unambiguity(2)  # TODO takes ages!
+    print("Starting training")
+    bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', 1000)
+    Tester.test_correct_trained_matrix_bpi19(bpi19_analyser.trained_matrix)
+    print("Starting prediction")
+    bpi19_analyser.predict_matrix(dfa_bpi19, 'data/bpi19.csv', 1, 200, 'results/bpi19.csv')
+    precision = bpi19_analyser.get_precision('data/bpi19.csv', 'results/bpi19.csv', 1, 199)
+    print(precision)
 
 
 Tester.test_precision()
