@@ -92,7 +92,7 @@ class UseCaseAnalyser:
                 next(csv_reader)
 
             with open(result_path, 'w', newline='\n') as resultFile:
-                csv_writer = csv.writer(resultFile)
+                csv_writer = csv.writer(resultFile, delimiter=self.delimiter)
                 for i in range(log_begin, log_end):
                     current_event = next(csv_reader)
                     new_state = dfa.delta(current_state, self.access_event(current_event))
@@ -109,7 +109,7 @@ class UseCaseAnalyser:
     def get_precision(self, actual_data_path, predicted_data_path, log_begin, log_end):
         with open(predicted_data_path) as predicted_file:
             precision_score = []
-            predicted_reader = csv.reader(predicted_file)
+            predicted_reader = csv.reader(predicted_file, delimiter=self.delimiter)
             # skip to log_begin position
             for i in range(0, log_begin):
                 next(predicted_reader)
@@ -120,7 +120,7 @@ class UseCaseAnalyser:
                 predicted_spread = int(predicted_row[3])
                 # compare prediction spread with actual spread
                 with open(actual_data_path) as actual_file:
-                    actual_reader = csv.reader(actual_file)
+                    actual_reader = csv.reader(actual_file, delimiter=self.delimiter)
                     # skip to log_begin position
                     for j in range(0, i):
                         next(actual_reader)
@@ -128,8 +128,8 @@ class UseCaseAnalyser:
                     # check for predicted_spread many actual events if they lead to a final state or not
                     prediction_correct = 0
                     for j in range(0, predicted_spread):
-                        # TODO implement one general event getter and specific ones per use case --> generalize different functions
-                        next_event = next(actual_reader)[0]#[19]
+                        next_row = next(actual_reader)
+                        next_event = self.access_event(next_row)
                         actual_next_state = self.dfa.delta(current_state, next_event)
                         if actual_next_state in self.dfa.final_states:
                             prediction_correct = 1
@@ -256,7 +256,7 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
                 next(csv_reader)
 
             with open(result_path, 'w', newline='\n') as resultFile:
-                csv_writer = csv.writer(resultFile)
+                csv_writer = csv.writer(resultFile, delimiter=self.delimiter)
                 for i in range(log_begin, log_end):
                     current_event = next(csv_reader)
                     if self.access_event(current_event) in self.alphabet:
@@ -339,7 +339,7 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
                 next(csv_reader)
 
             with open(result_path, 'w', newline='\n') as resultFile:
-                csv_writer = csv.writer(resultFile)
+                csv_writer = csv.writer(resultFile, delimiter=self.delimiter)
                 for i in range(log_begin, log_end):
                     current_event = next(csv_reader)
                     new_state = dfa.delta(current_state, current_event)

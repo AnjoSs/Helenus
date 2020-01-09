@@ -105,44 +105,40 @@ class Tester:
     def test_precision():
         pred_path = 'test/pred.csv'
         actual_path = 'test/actual.csv'
+        analyser = ABCUseCaseAnalyser()
+
         with open(actual_path, 'w', newline='\n') as a:
-            w = csv.writer(a)
+            w = csv.writer(a, delimiter=analyser.delimiter)
             w.writerow(['a'])  # 1c -> 0a
             w.writerow(['b'])  # 0a -> 1b
             w.writerow(['b'])  # 1b -> 1b
 
         # correct prediction
         with open(pred_path, 'w', newline='\n') as p:
-            w2 = csv.writer(p)
+            w2 = csv.writer(p, delimiter=analyser.delimiter)
             w2.writerow(['1c', 'a', "0a", 2])
             w2.writerow(['0a', 'b', "1b", 1])
             w2.writerow(['1b', 'b', "1b", 0])
 
-        analyser = ABCUseCaseAnalyser()
-        analyser.get_dfa()
         precision = analyser.get_precision(actual_path, pred_path, 0, 2)
         assert(precision == 1.0)
 
         # semi correct prediction
         with open(pred_path, 'w', newline='\n') as p:
-            w2 = csv.writer(p)
+            w2 = csv.writer(p, delimiter=analyser.delimiter)
             w2.writerow(['1c', 'a', "0a", 1])
             w2.writerow(['0a', 'b', "1b", 1])
             w2.writerow(['1b', 'b', "1b", 0])
 
-        analyser = ABCUseCaseAnalyser()
-        analyser.get_dfa()
         precision = analyser.get_precision(actual_path, pred_path, 0, 2)
         assert (precision == 0.5)
 
         # wrong prediction
         with open(pred_path, 'w', newline='\n') as p:
-            w2 = csv.writer(p)
+            w2 = csv.writer(p, delimiter=analyser.delimiter)
             w2.writerow(['1c', 'a', "0a", 1])
             w2.writerow(['0a', 'b', "1b", 0])
             w2.writerow(['1b', 'b', "1b", 0])  # TODO dow we want to allow predictions of 0?
 
-        analyser = ABCUseCaseAnalyser()
-        analyser.get_dfa()
         precision = analyser.get_precision(actual_path, pred_path, 0, 2)
         assert (precision == 0.0)
