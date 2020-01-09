@@ -146,5 +146,3 @@ class Tester:
         analyser.get_dfa()
         precision = analyser.get_precision(actual_path, pred_path, 0, 2)
         assert (precision == 0.0)
-
-

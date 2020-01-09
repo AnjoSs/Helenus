@@ -2,7 +2,6 @@ import csv
 import copy
 import abc
 
-# TODO: Use BPI challenge 2019 --> only 42 event types
 from DFA_Class import DFA
 from State_Transition_Matrix_Class import State_Transition_Matrix
 
@@ -15,6 +14,7 @@ class UseCaseAnalyser:
         self.final_states = self.get_final_states()
         self.alphabet = self.get_alphabet()
         self.initial_matrix = self.get_matrix()
+        self.dfa = self.get_dfa()
         self.trained_matrix = {}
         self.delimiter = ';'
 
@@ -79,27 +79,28 @@ class UseCaseAnalyser:
         return
 
     def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path):
-        # with open(data_path) as csv_file:
-        #     csv_reader = csv.reader(csv_file, delimiter=';')
-        #     next(csv_reader)
-        #     current_state = dfa.start_state[0]
-        #
-        #     # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
-        #     threshold = 0.8
-        #
-        #     # skip unwanted log entries
-        #     for i in range(0, log_begin):
-        #         next(csv_reader)
-        #
-        #     for i in range(log_begin, log_end):
-        #         current_event = next(csv_reader)
-        #         new_state = dfa.delta(current_state, current_event)
-        #
-        #         spread = self.find_spread(0, 1, threshold, new_state)  # tbd!!!
-        #
-        #         csv_writer = csv.writer(open('/results/prediction.csv'))
-        #         csv_writer.writerow(current_state, current_event, new_state, spread)
-        #         current_state = new_state
+        with open(data_path) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
+            next(csv_reader)
+            current_state = dfa.start_state[0]
+
+            # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
+            threshold = 0.8
+
+            # skip unwanted log entries
+            for i in range(0, log_begin):
+                next(csv_reader)
+
+            with open(result_path, 'w', newline='\n') as resultFile:
+                csv_writer = csv.writer(resultFile)
+                for i in range(log_begin, log_end):
+                    current_event = next(csv_reader)
+                    new_state = dfa.delta(current_state, self.access_event(current_event))
+
+                    spread = self.find_spread(0, 1, threshold, new_state)
+
+                    csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
+                    current_state = new_state
         return
 
     def find_spread(self, a, b, c, d):
@@ -114,7 +115,6 @@ class UseCaseAnalyser:
                 next(predicted_reader)
             # check correctness of predictions
             for i in range(log_begin, log_end):
-                dfa = self.get_dfa()  # TODO make this an instance variable
                 predicted_row = next(predicted_reader)
                 current_state = predicted_row[0]
                 predicted_spread = int(predicted_row[3])
@@ -130,8 +130,8 @@ class UseCaseAnalyser:
                     for j in range(0, predicted_spread):
                         # TODO implement one general event getter and specific ones per use case --> generalize different functions
                         next_event = next(actual_reader)[0]#[19]
-                        actual_next_state = dfa.delta(current_state, next_event)
-                        if actual_next_state in dfa.final_states:
+                        actual_next_state = self.dfa.delta(current_state, next_event)
+                        if actual_next_state in self.dfa.final_states:
                             prediction_correct = 1
                             break
                     precision_score.append(prediction_correct)
@@ -187,7 +187,7 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
 
     def get_alphabet(self):
         # TODO: ATTENTION: only taking a few event types!
-        return range(0, 10)
+        return ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
     def get_matrix(self):
         row_AA = []
@@ -203,7 +203,10 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
         return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
 
     def access_event(self, row):
-        return
+        if row[1] in self.event_types:
+            return str(self.event_types.index(row[1]))
+        else:
+            return
 
     def train_matrix(self, dfa, data_path, training_count):
         # Copy original matrix + fill with 0
@@ -239,29 +242,31 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
         self.trained_matrix = matrix
         return
 
-    # def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path):
-    #     with open(data_path) as csv_file:
-    #         csv_reader = csv.reader(csv_file, delimiter=';')
-    #         next(csv_reader)
-    #         current_state = dfa.start_state[0]
-    #
-    #         # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
-    #         threshold = 0.8
-    #
-    #         # skip unwanted log entries
-    #         for i in range(0, log_begin):
-    #             next(csv_reader)
-    #
-    #         for i in range(log_begin, log_end):
-    #             current_event = next(csv_reader)
-    #             new_state = dfa.delta(current_state, str(self.event_types.index(current_event[1])))
-    #
-    #             spread = self.find_spread(0, 1, threshold, new_state)  # tbd!!!
-    #
-    #             csv_writer = csv.writer(open(result_path))
-    #             csv_writer.writerow(current_state, current_event, new_state, spread)
-    #             current_state = new_state
-    #     return
+    def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path):
+        with open(data_path) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
+            next(csv_reader)
+            current_state = dfa.start_state[0]
+
+            # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
+            threshold = 0.8
+
+            # skip unwanted log entries
+            for i in range(0, log_begin):
+                next(csv_reader)
+
+            with open(result_path, 'w', newline='\n') as resultFile:
+                csv_writer = csv.writer(resultFile)
+                for i in range(log_begin, log_end):
+                    current_event = next(csv_reader)
+                    if self.access_event(current_event) in self.alphabet:
+                        new_state = dfa.delta(current_state, self.access_event(current_event))
+
+                        spread = self.find_spread(0, 1, threshold, new_state)
+
+                        csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
+                        current_state = new_state
+        return
 
     # def find_spread(self, depth, current_probability, bound, current_state):
     #     # Input: matrix, current_state, threshold, max_distance
@@ -345,6 +350,7 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
                     current_state = new_state
         return
 
+
 """
 BPI 2019 Challenge
 LTL: F('SRM: Transfer Failed (E.Sys.)') == Fa
@@ -397,31 +403,6 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
                     event_types.append(row[19])
                     count += 1
 
-        print("Event Types: " + str(event_types))
-        print("Event Count: " + str(count))
+        # print("Event Types: " + str(event_types))
+        # print("Event Count: " + str(count))
         return event_types
-
-    def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path):
-        with open(data_path) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            next(csv_reader)
-            current_state = dfa.start_state[0]
-
-            # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
-            threshold = 0.8
-
-            # skip unwanted log entries
-            for i in range(0, log_begin):
-                next(csv_reader)
-
-            with open(result_path, 'w', newline='\n') as resultFile:
-                csv_writer = csv.writer(resultFile)
-                for i in range(log_begin, log_end):
-                    current_event = next(csv_reader)
-                    new_state = dfa.delta(current_state, str(self.event_types.index(current_event[19])))
-
-                    spread = self.find_spread(0, 1, threshold, new_state)
-
-                    csv_writer.writerow([current_state, current_event[19], new_state, spread])
-                    current_state = new_state
-        return

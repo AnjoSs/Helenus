@@ -37,6 +37,8 @@ def main():
     """ BPI11 use case"""
     # TODO something is wrong with this use case. if unambiguity is 2, the percentage per row is not 1.
     # probably due to not taking all event types and thus missing state transitions
+    data_path = 'data/hospital_log.csv'
+    pred_path = 'results/bpi11.csv'
     analyser = BPIUseCaseAnalyser()
     dfa = analyser.get_dfa()
     print("Starting unambiguity 1")
@@ -44,12 +46,13 @@ def main():
     Tester.test_correct_dfa_bpi11(dfa)
     # print("Starting unambiguity 2")
     # dfa.increase_unambiguity(2)
-    Tester.test_correct_dfa_bpi11(dfa)
+    # Tester.test_correct_dfa_bpi11(dfa)
 
-    analyser.train_matrix(dfa, 'data/hospital_log.csv', 75000)
-    print(dfa.state_transition_matrix.matrix)
-    print(analyser.trained_matrix)
+    analyser.train_matrix(dfa, data_path, 75000)
     Tester.test_correct_trained_matrix_bpi11(analyser.trained_matrix, dfa)
+    analyser.predict_matrix(dfa, data_path, 1, 10000, pred_path)
+    p = analyser.get_precision(data_path, pred_path, 1, 200)
+    print(p)
 
     """ ABC use case for testing """
     # abc_analyser = ABCUseCaseAnalyser()
