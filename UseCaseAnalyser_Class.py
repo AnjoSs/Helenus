@@ -362,28 +362,6 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
                   [[], ["b"], ["a"], ["c"]]]
         return State_Transition_Matrix(self.states, self.alphabet, matrix)
 
-    def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path, max_distance, threshold):
-        with open(data_path) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            next(csv_reader)
-            current_state = dfa.start_state[0]
-
-            # skip unwanted log entries
-            for i in range(0, log_begin):
-                next(csv_reader)
-
-            with open(result_path, 'w', newline='\n') as resultFile:
-                csv_writer = csv.writer(resultFile, delimiter=self.delimiter)
-                for i in range(log_begin, log_end):
-                    current_event = next(csv_reader)
-                    new_state = dfa.delta(current_state, current_event)
-
-                    spread = self.find_spread(new_state, max_distance, threshold)
-
-                    csv_writer.writerow([current_state, current_event, new_state, spread])
-                    current_state = new_state
-        return
-
 
 """
 BPI 2019 Challenge
