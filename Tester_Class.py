@@ -103,15 +103,15 @@ class Tester:
 
     @staticmethod
     def test_correct_prediction_abc(trained_matrix):
-        assert true
+        assert True
 
     @staticmethod
     def test_correct_prediction_bpi11(trained_matrix):
-        assert true
+        assert True
 
     @staticmethod
     def test_correct_prediction_bpi19(trained_matrix):
-        assert true
+        assert True
 
     @staticmethod
     def test_precision():
@@ -132,7 +132,7 @@ class Tester:
             w2.writerow(['0a', 'b', "1b", 1])
             w2.writerow(['1b', 'b', "1b", 0])
 
-        precision = analyser.get_precision(actual_path, pred_path, 0, 2)
+        precision = analyser.get_precision(actual_path, pred_path, 0, 2, 2)
         assert (precision == 1.0)
 
         # semi correct prediction
@@ -142,7 +142,7 @@ class Tester:
             w2.writerow(['0a', 'b', "1b", 1])
             w2.writerow(['1b', 'b', "1b", 0])
 
-        precision = analyser.get_precision(actual_path, pred_path, 0, 2)
+        precision = analyser.get_precision(actual_path, pred_path, 0, 2, 2)
         assert (precision == 0.5)
 
         # wrong prediction
@@ -150,7 +150,7 @@ class Tester:
             w2 = csv.writer(p, delimiter=analyser.delimiter)
             w2.writerow(['1c', 'a', "0a", 1])
             w2.writerow(['0a', 'b', "1b", 0])
-            w2.writerow(['1b', 'b', "1b", 0])  # TODO dow we want to allow predictions of 0?
+            w2.writerow(['1b', 'b', "1b", 0])  # TODO do we want to allow predictions of 0?
 
-        precision = analyser.get_precision(actual_path, pred_path, 0, 2)
+        precision = analyser.get_precision(actual_path, pred_path, 0, 2, 2)
         assert (precision == 0.0)

@@ -78,13 +78,11 @@ class UseCaseAnalyser:
         self.trained_matrix = matrix
         return
 
-    def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path):
+    def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path, max_distance, threshold):
         with open(data_path) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
             next(csv_reader)
             current_state = dfa.start_state[0]
-            threshold = 0.8
-            max_distance = 4
 
             # skip unwanted log entries
             for i in range(0, log_begin):
@@ -156,10 +154,7 @@ class UseCaseAnalyser:
 
         return probabilities
 
-
-
-
-    def get_precision(self, actual_data_path, predicted_data_path, log_begin, log_end):
+    def get_precision(self, actual_data_path, predicted_data_path, log_begin, log_end, max_spread):
         with open(predicted_data_path) as predicted_file:
             precision_score = []
             predicted_reader = csv.reader(predicted_file, delimiter=self.delimiter)
@@ -177,16 +172,26 @@ class UseCaseAnalyser:
                     # skip to log_begin position
                     for j in range(0, i):
                         next(actual_reader)
-                    # TODO check if actually the correct line or one ahead / behind (actual vs pred file)
-                    # check for predicted_spread many actual events if they lead to a final state or not
-                    prediction_correct = 0
-                    for j in range(0, predicted_spread):
-                        next_row = next(actual_reader)
-                        next_event = self.access_event(next_row)
-                        actual_next_state = self.dfa.delta(current_state, next_event)
-                        if actual_next_state in self.dfa.final_states:
-                            prediction_correct = 1
-                            break
+                    # case for prediction that final state is not reached in next max_spread events
+                    if predicted_spread == -1:
+                        prediction_correct = 1
+                        for j in range(0, max_spread):
+                            next_row = next(actual_reader)
+                            next_event = self.access_event(next_row)
+                            actual_next_state = self.dfa.delta(current_state, next_event)
+                            if actual_next_state in self.dfa.final_states:
+                                prediction_correct = 0
+                                break
+                    else:
+                        prediction_correct = 0
+                        # check for predicted_spread many actual events if they lead to a final state or not
+                        for j in range(0, predicted_spread):
+                            next_row = next(actual_reader)
+                            next_event = self.access_event(next_row)
+                            actual_next_state = self.dfa.delta(current_state, next_event)
+                            if actual_next_state in self.dfa.final_states:
+                                prediction_correct = 1
+                                break
                     precision_score.append(prediction_correct)
             return sum(precision_score)/len(precision_score)
 
@@ -296,15 +301,11 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
         self.trained_matrix = matrix
         return
 
-    def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path):
+    def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path, max_distance, threshold):
         with open(data_path) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
             next(csv_reader)
             current_state = dfa.start_state[0]
-
-            # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
-            threshold = 0.5
-            max_distance = 4
 
             # skip unwanted log entries
             for i in range(0, log_begin):
@@ -322,25 +323,6 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
                         csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
                         current_state = new_state
         return
-
-    # def find_spread(self, depth, current_probability, bound, current_state):
-    #     # Input: matrix, current_state, threshold, max_distance
-    #     states_to_investigate = []
-    #     for probability in self.trained_matrix[self.states.index(current_state)]:
-    #
-    #         if self.trained_matrix != 0:
-    #             # TODO: what is row?
-    #             row = []
-    #             next_state = self.get_dfa().delta(current_state, str(self.event_types.index(row[1])))
-    #
-    #             if next_state in self.final_states:
-    #                 current_probability = current_probability + current_probability * probability
-    #
-    #             if next_state not in self.final_states:
-    #                 states_to_investigate.append(next_state)
-    #
-    #     if current_probability >= bound:
-    #         return depth + 1
 
 
 """
@@ -380,15 +362,11 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
                   [[], ["b"], ["a"], ["c"]]]
         return State_Transition_Matrix(self.states, self.alphabet, matrix)
 
-    def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path):
+    def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path, max_distance, threshold):
         with open(data_path) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)
             current_state = dfa.start_state[0]
-
-            # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
-            threshold = 0.9
-            max_distance = 10
 
             # skip unwanted log entries
             for i in range(0, log_begin):
