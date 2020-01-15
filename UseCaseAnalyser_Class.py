@@ -84,6 +84,7 @@ class UseCaseAnalyser:
             next(csv_reader)
             current_state = dfa.start_state[0]
             threshold = 0.8
+            max_distance = 4
 
             # skip unwanted log entries
             for i in range(0, log_begin):
@@ -97,14 +98,66 @@ class UseCaseAnalyser:
 
                     # iterate over events and predict the shortest path that leads to an accepting state
                     # with p > threshold
-                    spread = self.find_spread(0, 1, threshold, new_state)
+                    spread = self.find_spread(new_state, max_distance, threshold)
 
                     csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
                     current_state = new_state
         return
 
-    def find_spread(self, a, b, c, d):
-        return 1
+    def find_spread(self, current_state, max_distance, threshold):
+        for possible_spread in range(1, max_distance):
+            result = self.check_spread(possible_spread, threshold, current_state)
+            if result == 1:
+                return possible_spread
+        return -1
+
+    def check_spread(self, depth, threshold, current_state):
+        probabilities = self.calculate_spread_probabilities(depth, current_state)
+        probability = 0
+
+        for path in probabilities:
+            path_prob = 1
+            for event_prob in path:
+                path_prob = path_prob * event_prob
+            probability = probability + path_prob
+
+        if probability >= threshold:
+            return 1
+        return 0
+
+    def calculate_spread_probabilities(self, depth, state):
+        if depth <= 0:
+            if state in self.final_states:
+                return[0.0]
+            return []
+
+        probabilities = []
+        i = 0
+        for pos in range(0, len(self.trained_matrix[self.states.index(state)])):
+            prob = self.trained_matrix[self.states.index(state)][pos][0]
+            if prob != 0:
+                next_state = self.states[pos]
+                next_probabilities = self.calculate_spread_probabilities(depth-1, next_state)
+
+                for next_probs in next_probabilities:
+                    probabilities.append([])
+                    probabilities[i].append(prob)
+                    if isinstance(next_probs, list):
+                        for next_prob in next_probs:
+                            probabilities[i].append(next_prob)
+                    if isinstance(next_probs, float):
+                        probabilities[i].append(next_probs)
+                    i += 1
+
+                if next_probabilities == []:
+                    probabilities.append([])
+                    probabilities[i].append(prob)
+                    i += 1
+
+        return probabilities
+
+
+
 
     def get_precision(self, actual_data_path, predicted_data_path, log_begin, log_end):
         with open(predicted_data_path) as predicted_file:
@@ -250,7 +303,8 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
             current_state = dfa.start_state[0]
 
             # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
-            threshold = 0.8
+            threshold = 0.5
+            max_distance = 4
 
             # skip unwanted log entries
             for i in range(0, log_begin):
@@ -263,7 +317,7 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
                     if self.access_event(current_event) in self.alphabet:
                         new_state = dfa.delta(current_state, self.access_event(current_event))
 
-                        spread = self.find_spread(0, 1, threshold, new_state)
+                        spread = self.find_spread(current_state, max_distance, threshold)
 
                         csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
                         current_state = new_state
@@ -333,7 +387,8 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
             current_state = dfa.start_state[0]
 
             # iterate over events and predict the shortest path that leads to an accepting state with p > 0,8
-            threshold = 0.8
+            threshold = 0.9
+            max_distance = 10
 
             # skip unwanted log entries
             for i in range(0, log_begin):
@@ -345,7 +400,7 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
                     current_event = next(csv_reader)
                     new_state = dfa.delta(current_state, current_event)
 
-                    spread = self.find_spread(0, 1, threshold, new_state)
+                    spread = self.find_spread(new_state, max_distance, threshold)
 
                     csv_writer.writerow([current_state, current_event, new_state, spread])
                     current_state = new_state
@@ -404,6 +459,4 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
                     event_types.append(row[19])
                     count += 1
 
-        # print("Event Types: " + str(event_types))
-        # print("Event Count: " + str(count))
         return event_types

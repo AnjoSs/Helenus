@@ -102,6 +102,18 @@ class Tester:
             assert (round(percentage_sum, 3) == 1.0 or percentage_sum == 0)
 
     @staticmethod
+    def test_correct_prediction_abc(trained_matrix):
+        assert true
+
+    @staticmethod
+    def test_correct_prediction_bpi11(trained_matrix):
+        assert true
+
+    @staticmethod
+    def test_correct_prediction_bpi19(trained_matrix):
+        assert true
+
+    @staticmethod
     def test_precision():
         pred_path = 'test/pred.csv'
         actual_path = 'test/actual.csv'
