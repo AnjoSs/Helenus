@@ -102,8 +102,30 @@ class Tester:
             assert (round(percentage_sum, 3) == 1.0 or percentage_sum == 0)
 
     @staticmethod
-    def test_correct_prediction_abc(trained_matrix):
-        assert True
+    def test_correct_prediction_abc(use_case):
+        thresholds_to_test = [0.5, 0.8, 0.95]
+        max_distance = 5
+
+        current_states = use_case.states
+
+        assert(use_case.find_spread(current_states[0], 1, 0.5) == 0)
+        assert(use_case.find_spread(current_states[1], 1, 0.5) == 0)
+        assert(use_case.find_spread(current_states[2], 1, 0.5) == -1)
+        assert(use_case.find_spread(current_states[3], 1, 0.5) == -1)
+        assert(use_case.find_spread(current_states[2], 1, 0.09) == 1)
+        assert(use_case.find_spread(current_states[3], 1, 0.19) == 1)
+
+        assert(use_case.find_spread(current_states[2], 2, 0.19) == 2)
+        assert(use_case.find_spread(current_states[2], 2, 0.09) == 1)
+        assert(use_case.find_spread(current_states[2], 2, 0.2) == -1)
+        assert(use_case.find_spread(current_states[3], 2, 0.33) == 2)
+        assert(use_case.find_spread(current_states[3], 2, 0.35) == -1)
+        assert(use_case.find_spread(current_states[0], 2, 0.8) == 0)
+        assert(use_case.find_spread(current_states[1], 2, 0.8) == 0)
+
+        assert(use_case.find_spread(current_states[2], 10, 0.4) == 5)
+        assert(use_case.find_spread(current_states[2], 10, 0.7) == 9)
+
 
     @staticmethod
     def test_correct_prediction_bpi11(trained_matrix):

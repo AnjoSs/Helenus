@@ -103,10 +103,12 @@ class UseCaseAnalyser:
         return
 
     def find_spread(self, current_state, max_distance, threshold):
-        for possible_spread in range(1, max_distance):
-            result = self.check_spread(possible_spread, threshold, current_state)
+        if current_state in self.final_states:
+            return 0
+        for possible_spread in range(0, max_distance):
+            result = self.check_spread(possible_spread+1, threshold, current_state)
             if result == 1:
-                return possible_spread
+                return possible_spread+1
         return -1
 
     def check_spread(self, depth, threshold, current_state):
@@ -125,7 +127,7 @@ class UseCaseAnalyser:
 
     def calculate_spread_probabilities(self, depth, state):
         if depth <= 0:
-            if state in self.final_states:
+            if state not in self.final_states:
                 return[0.0]
             return []
 
@@ -135,22 +137,29 @@ class UseCaseAnalyser:
             prob = self.trained_matrix[self.states.index(state)][pos][0]
             if prob != 0:
                 next_state = self.states[pos]
-                next_probabilities = self.calculate_spread_probabilities(depth-1, next_state)
 
-                for next_probs in next_probabilities:
-                    probabilities.append([])
-                    probabilities[i].append(prob)
-                    if isinstance(next_probs, list):
-                        for next_prob in next_probs:
-                            probabilities[i].append(next_prob)
-                    if isinstance(next_probs, float):
-                        probabilities[i].append(next_probs)
-                    i += 1
-
-                if next_probabilities == []:
+                if next_state in self.final_states:
                     probabilities.append([])
                     probabilities[i].append(prob)
                     i += 1
+
+                else:
+                    next_probabilities = self.calculate_spread_probabilities(depth-1, next_state)
+
+                    for next_probs in next_probabilities:
+                        probabilities.append([])
+                        probabilities[i].append(prob)
+                        if isinstance(next_probs, list):
+                            for next_prob in next_probs:
+                                probabilities[i].append(next_prob)
+                        if isinstance(next_probs, float):
+                            probabilities[i].append(next_probs)
+                        i += 1
+
+                    if next_probabilities == []:
+                        probabilities.append([])
+                        probabilities[i].append(prob)
+                        i += 1
 
         return probabilities
 

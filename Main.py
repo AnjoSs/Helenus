@@ -70,6 +70,7 @@ def main():
     Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
     print("Starting prediction")
     abc_analyser.predict_matrix(dfa, 'data/abc.csv', 0, 100, 'results/abc.csv', max_distance, threshold)
+    Tester.test_correct_prediction_abc(abc_analyser)
     p = abc_analyser.get_precision('data/abc.csv', 'results/abc.csv', 0, 100, max_distance)
     print(p)
 
