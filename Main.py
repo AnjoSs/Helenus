@@ -44,7 +44,7 @@ def main():
                 bpi19_analyser.predict_matrix(dfa_bpi19, data_path, training_log_size, training_log_size + prediction_size + 1, prediction_path, distance, threshold)
                 logging.info(str(datetime.datetime.now()) + " #### Finished prediction for threshold " + str(threshold))
                 logging.info(str(datetime.datetime.now()) + " #### Starting precision calculation for threshold " + str(threshold))
-                precision = bpi19_analyser.get_precision(data_path, prediction_path, training_log_size, 0, prediction_size, distance)
+                precision = bpi19_analyser.get_precision(data_path, prediction_path, training_log_size + 1, 0, prediction_size, distance)
                 logging.info(str(datetime.datetime.now()) + " #### Finished precision calculation for threshold " + str(threshold) + " - precision: " + str(precision))
 
 
