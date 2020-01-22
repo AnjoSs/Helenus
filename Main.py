@@ -1,94 +1,51 @@
-from State_Transition_Matrix_Class import State_Transition_Matrix
-from DFA_Class import DFA
-from UseCaseAnalyser_Class import BPIUseCaseAnalyser, ABCUseCaseAnalyser, BPI19UseCaseAnalyser
+import csv
+
 from Tester_Class import Tester
+from UseCaseAnalyser_Class import BPI19UseCaseAnalyser
+import logging
+import datetime
 
 
 def main():
-    """ Old hardcoded test cases """
-    # hardcoded input values for order 1 LTL: Fb
-    # states = ['A', 'B', 'B2']
-    # start_state = ['B']
-    # alphabet = ['a', 'b']
-    # final_states = ['A', 'B2']
-    # state_transition_matrix = [[['a'], [], ['b']], [['a'], ['b'], []], [['a'], [], ['b']]]
-    #
-    # # create DFA Object with a State Transition Matrix Object
-    # matrix1 = State_Transition_Matrix(states, alphabet, state_transition_matrix)
-    # dfa1 = DFA(states, start_state, alphabet, final_states, matrix1)
-    #
-    # dfa1.increase_unambiguity(2)
-    # Tester.test_correct_unambiguity_2(dfa1)
-    # #print('#########################################')
-    # #dfa1.increase_unambiguity(3)
-    #
-    # states = ['A', 'B']
-    # start_state = ['B']
-    # alphabet = ['a', 'b']
-    # final_states = ['B']
-    # state_transition_matrix = [[['a'], ['b']], [['a'], ['b']]]
-    # order = 2
-    #
-    # matrix2 = State_Transition_Matrix(states, alphabet, state_transition_matrix)
-    # dfa2 = DFA(states, start_state, alphabet, final_states, matrix2)
-
-################################################################################
-
-    """ BPI11 use case"""
-    # TODO something is wrong with this use case. if unambiguity is 2, the percentage per row is not 1.
-    # probably due to not taking all event types and thus missing state transitions
-    # data_path = 'data/hospital_log.csv'
-    # pred_path = 'results/bpi11.csv'
-    # analyser = BPIUseCaseAnalyser()
-    # dfa = analyser.get_dfa()
-    # print("Starting unambiguity 1")
-    # dfa.increase_unambiguity(1)
-    # Tester.test_correct_dfa_bpi11(dfa)
-    # # print("Starting unambiguity 2")
-    # # dfa.increase_unambiguity(2)
-    # # Tester.test_correct_dfa_bpi11(dfa)
-    #
-    # analyser.train_matrix(dfa, data_path, 75000)
-    # Tester.test_correct_trained_matrix_bpi11(analyser.trained_matrix)
-    # threshold = 0.5
-    # max_distance = 4
-    # analyser.predict_matrix(dfa, data_path, 1, 10000, pred_path, max_distance, threshold)
-    # p = analyser.get_precision(data_path, pred_path, 1, 200, max_distance)
-    # print(p)
-
-    """ ABC use case for testing """
-    abc_analyser = ABCUseCaseAnalyser()
-    dfa = abc_analyser.get_dfa()
-    print("Starting unambiguity 1")
-    dfa.increase_unambiguity(1)  # should not change anything
-    print(dfa.state_transition_matrix.matrix)
-
-    threshold = 0.9
-    max_distance = 10
-    print("Starting training")
-    abc_analyser.train_matrix(dfa, 'data/abc.csv', 999)
-    Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
-    print("Starting prediction")
-    abc_analyser.predict_matrix(dfa, 'data/abc.csv', 0, 100, 'results/abc.csv', max_distance, threshold)
-    Tester.test_correct_prediction_abc(abc_analyser)
-    p = abc_analyser.get_precision('data/abc.csv', 'results/abc.csv', 0, 100, max_distance)
-    print(p)
+    logging.basicConfig(filename="logs/general.log", level=logging.INFO)
 
     """ BPI19 use case """
-    # bpi19_analyser = BPI19UseCaseAnalyser()
-    # dfa_bpi19 = bpi19_analyser.get_dfa()
-    #
-    # dfa_bpi19.increase_unambiguity(1)
-    # # dfa_bpi19.increase_unambiguity(2)  # TODO takes ages!
-    # print("Starting training")
-    # bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', 1000)
-    # Tester.test_correct_trained_matrix_bpi19(bpi19_analyser.trained_matrix)
-    # threshold = 0.8
-    # max_distance = 4
-    # print("Starting prediction")
-    # bpi19_analyser.predict_matrix(dfa_bpi19, 'data/bpi19.csv', 1, 200, 'results/bpi19.csv', max_distance, threshold)
-    # precision = bpi19_analyser.get_precision('data/bpi19.csv', 'results/bpi19.csv', 1, 199, max_distance)
-    # print(precision)
+    logging.info(str(datetime.datetime.now()) + " # Starting BPI19 Use Case with LTL: Fa")
+    logging.info(str(datetime.datetime.now()) + " ## Starting creating use case dfa")
+    bpi19_analyser = BPI19UseCaseAnalyser()
+    dfa_bpi19 = bpi19_analyser.get_dfa()
+    logging.info(str(datetime.datetime.now()) + " ## Finished creating use case dfa")
+    with open('logs/dfaBPI19.csv', 'w') as dfa_file:
+        csv.writer(dfa_file).writerow([str(dfa_bpi19)])
+
+
+    # TODO change to [1, 2, 3]
+    orders_to_test = [1]
+    training_log_size = 1000
+    prediction_size = 500
+    for order in orders_to_test:
+        logging.info(str(datetime.datetime.now()) + " ## Starting increasing unambiguity: " + str(order))
+        dfa_bpi19.increase_unambiguity(order)
+        logging.info(str(datetime.datetime.now()) + " ## Finished increasing unambiguity: " + str(order))
+        logging.info(str(datetime.datetime.now()) + " ## Starting training matrix")
+        bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', training_log_size)
+        logging.info(str(datetime.datetime.now()) + " ## Finished training matrix")
+        with open('logs/trainedMatrixBPI19.csv', 'w') as matrix_file:
+            csv.writer(matrix_file).writerow(str(bpi19_analyser.trained_matrix))
+        data_path = 'data/bpi19.csv'
+        tested_thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        max_distances = [1, 4]  # TODO change to something way bigger (5 for 3 event types --> for 40 event types: 40-67!
+        logging.info(str(datetime.datetime.now()) + " ## Starting tests with order " + str(order))
+        for distance in max_distances:
+            logging.info(str(datetime.datetime.now()) + " ### Starting tests for max_distance: " + str(distance))
+            for threshold in tested_thresholds:
+                prediction_path = 'predictions/bpi19-' + str(order) + '-' + str(distance) + '-' + str(threshold) + '.csv'
+                logging.info(str(datetime.datetime.now()) + " #### Starting prediction for threshold " + str(threshold))
+                bpi19_analyser.predict_matrix(dfa_bpi19, data_path, training_log_size, training_log_size + prediction_size + 1, prediction_path, distance, threshold)
+                logging.info(str(datetime.datetime.now()) + " #### Finished prediction for threshold " + str(threshold))
+                logging.info(str(datetime.datetime.now()) + " #### Starting precision calculation for threshold " + str(threshold))
+                precision = bpi19_analyser.get_precision(data_path, prediction_path, training_log_size, 0, prediction_size, distance)
+                logging.info(str(datetime.datetime.now()) + " #### Finished precision calculation for threshold " + str(threshold) + " - precision: " + str(precision))
 
 
 Tester.test_precision()

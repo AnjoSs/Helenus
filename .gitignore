@@ -2,4 +2,8 @@
 data/
 results/
 test/
+logs/general.log
+logs/dfaBPI19.csv
+logs/trainedMatrixBPI19.csv
+predictions/
 __pycache__/
