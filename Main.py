@@ -24,6 +24,7 @@ def main():
     training_log_size = 1000
     prediction_size = 500
     for order in orders_to_test:
+        print("Processing order " + str(order))
         logging.info(str(datetime.datetime.now()) + " ## Starting increasing unambiguity: " + str(order))
         dfa_bpi19.increase_unambiguity(order)
         logging.info(str(datetime.datetime.now()) + " ## Finished increasing unambiguity: " + str(order))
@@ -34,11 +35,13 @@ def main():
             csv.writer(matrix_file).writerow(str(bpi19_analyser.trained_matrix))
         data_path = 'data/bpi19.csv'
         tested_thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-        max_distances = [10]  # TODO change to something way bigger (5 for 3 event types --> for 40 event types: 40-67!
+        max_distances = [2]  # TODO change to something way bigger (5 for 3 event types --> for 40 event types: 40-67!
         logging.info(str(datetime.datetime.now()) + " ## Starting tests with order " + str(order))
         for distance in max_distances:
+            print("Processing distance: " + str(distance))
             logging.info(str(datetime.datetime.now()) + " ### Starting tests for max_distance: " + str(distance))
             for threshold in tested_thresholds:
+                print("Processing threshold: " + str(threshold))
                 prediction_path = 'predictions/bpi19-' + str(order) + '-' + str(distance) + '-' + str(threshold) + '.csv'
                 logging.info(str(datetime.datetime.now()) + " #### Starting prediction for threshold " + str(threshold))
                 bpi19_analyser.predict_matrix(dfa_bpi19, data_path, training_log_size, training_log_size + prediction_size + 1, prediction_path, distance, threshold)
