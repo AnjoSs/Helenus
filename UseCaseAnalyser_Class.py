@@ -57,7 +57,7 @@ class UseCaseAnalyser:
                 col.append(0)
 
         # replay log entries + count transitions
-        with open(data_path, encoding='utf-8') as csv_file:
+        with open(data_path, encoding='windows-1252') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
             next(csv_reader)  # skip headline
             current_state = dfa.start_state[0]
@@ -79,7 +79,7 @@ class UseCaseAnalyser:
         return
 
     def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path, max_distance, threshold):
-        with open(data_path, encoding='utf-8') as csv_file:
+        with open(data_path, encoding='windows-1252') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
             next(csv_reader)
             current_state = dfa.start_state[0]
@@ -88,7 +88,7 @@ class UseCaseAnalyser:
             for i in range(0, log_begin):
                 next(csv_reader)
 
-            with open(result_path, 'w', newline='\n', encoding='utf-8') as resultFile:
+            with open(result_path, 'w', newline='\n', encoding='windows-1252') as resultFile:
                 csv_writer = csv.writer(resultFile, delimiter=self.delimiter)
                 for i in range(log_begin, log_end):
                     current_event = next(csv_reader)
@@ -164,7 +164,7 @@ class UseCaseAnalyser:
         return probabilities
 
     def get_precision(self, actual_data_path, predicted_data_path, actual_log_begin, predicted_log_begin, predicted_log_end, max_spread):
-        with open(predicted_data_path, encoding='utf-8') as predicted_file:
+        with open(predicted_data_path, encoding='windows-1252') as predicted_file:
             precision_score = []
             predicted_reader = csv.reader(predicted_file, delimiter=self.delimiter)
             # skip to log_begin position
@@ -176,7 +176,7 @@ class UseCaseAnalyser:
                 current_state = predicted_row[2]
                 predicted_spread = int(predicted_row[3])
                 # compare prediction spread with actual spread
-                with open(actual_data_path, encoding='utf-8') as actual_file:
+                with open(actual_data_path, encoding='windows-1252') as actual_file:
                     actual_reader = csv.reader(actual_file, delimiter=self.delimiter)
                     # skip to actual_log_begin position
                     for j in range(0, actual_log_begin + i):
@@ -237,7 +237,7 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
         return ["B"]
 
     def get_event_types(self):
-        with open('data/hospital_log.csv', encoding='utf-8') as csv_file:
+        with open('data/hospital_log.csv', encoding='windows-1252') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=';')
             next(csv_reader)
             event_types = []
@@ -296,7 +296,7 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
                 col.append(0)
 
         # replay training_count log entries + count transitions
-        with open(data_path, encoding='utf-8') as csv_file:
+        with open(data_path, encoding='windows-1252') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=';')
             next(csv_reader)
             current_state = dfa.start_state[0]
@@ -319,7 +319,7 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
         return
 
     def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path, max_distance, threshold):
-        with open(data_path, encoding='utf-8') as csv_file:
+        with open(data_path, encoding='windows-1252') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
             next(csv_reader)
             current_state = dfa.start_state[0]
@@ -328,7 +328,7 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
             for i in range(0, log_begin):
                 next(csv_reader)
 
-            with open(result_path, 'w', newline='\n', encoding='utf-8') as resultFile:
+            with open(result_path, 'w', newline='\n', encoding='windows-1252') as resultFile:
                 csv_writer = csv.writer(resultFile, delimiter=self.delimiter)
                 for i in range(log_begin, log_end):
                     current_event = next(csv_reader)
@@ -422,7 +422,7 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
 
     @staticmethod
     def get_event_types():
-        with open('data/bpi19.csv', encoding='utf-8') as csv_file:
+        with open('data/bpi19.csv', encoding='windows-1252') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)
             event_types = []
