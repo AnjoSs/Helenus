@@ -7,11 +7,7 @@ class DFA:
         self.state_transition_matrix = state_transition_matrix
 
     def __str__(self):
-        return f"States: {str(self.states)} \n " \
-            f"Start State: {str(self.start_state)} \n " \
-            f"Final States: {str(self.final_states)} \n " \
-            f"Alphabet: {str(self.alphabet)} \n " \
-            f"Matrix: {str(self.state_transition_matrix)}"
+        return f"States: {str(self.states)} \n Start State: {str(self.start_state)} \n Final States: {str(self.final_states)} \n Alphabet: {str(self.alphabet)} \n Matrix: {str(self.state_transition_matrix)}"
 
     def get_predecessor_states(self, state):
         return self.state_transition_matrix.get_predecessor_states(state)
