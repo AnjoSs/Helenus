@@ -163,24 +163,26 @@ class UseCaseAnalyser:
 
         return probabilities
 
-    def get_precision(self, actual_data_path, predicted_data_path, log_begin, log_end, max_spread):
+    def get_precision(self, actual_data_path, predicted_data_path, actual_log_begin, predicted_log_begin, predicted_log_end, max_spread):
         with open(predicted_data_path) as predicted_file:
             precision_score = []
             predicted_reader = csv.reader(predicted_file, delimiter=self.delimiter)
             # skip to log_begin position
-            for i in range(0, log_begin):
+            for i in range(0, predicted_log_begin):
                 next(predicted_reader)
             # check correctness of predictions
-            for i in range(log_begin, log_end):
+            for i in range(predicted_log_begin, predicted_log_end):
                 predicted_row = next(predicted_reader)
-                current_state = predicted_row[0]
+                current_state = predicted_row[2]
                 predicted_spread = int(predicted_row[3])
                 # compare prediction spread with actual spread
                 with open(actual_data_path) as actual_file:
                     actual_reader = csv.reader(actual_file, delimiter=self.delimiter)
-                    # skip to log_begin position
-                    for j in range(0, i):
+                    # skip to actual_log_begin position
+                    for j in range(0, actual_log_begin + i):
                         next(actual_reader)
+                    event_leading_to_current_state = self.access_event(next(actual_reader))
+                    assert(event_leading_to_current_state == predicted_row[1])
                     # case for prediction that final state is not reached in next max_spread events
                     if predicted_spread == -1:
                         prediction_correct = 1
@@ -191,6 +193,12 @@ class UseCaseAnalyser:
                             if actual_next_state in self.dfa.final_states:
                                 prediction_correct = 0
                                 break
+                    elif predicted_spread == 0:
+                        next_row = next(actual_reader)
+                        next_event = self.access_event(next_row)  # next?event == predicted?row[1]
+                        actual_next_state = self.dfa.delta(current_state, next_event)
+                        if actual_next_state in self.dfa.final_states:
+                            prediction_correct = 1
                     else:
                         prediction_correct = 0
                         # check for predicted_spread many actual events if they lead to a final state or not
