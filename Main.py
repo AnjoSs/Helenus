@@ -34,7 +34,7 @@ def main():
             csv.writer(matrix_file).writerow(str(bpi19_analyser.trained_matrix))
         data_path = 'data/bpi19.csv'
         tested_thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-        max_distances = [1, 4]  # TODO change to something way bigger (5 for 3 event types --> for 40 event types: 40-67!
+        max_distances = [10]  # TODO change to something way bigger (5 for 3 event types --> for 40 event types: 40-67!
         logging.info(str(datetime.datetime.now()) + " ## Starting tests with order " + str(order))
         for distance in max_distances:
             logging.info(str(datetime.datetime.now()) + " ### Starting tests for max_distance: " + str(distance))
@@ -48,5 +48,5 @@ def main():
                 logging.info(str(datetime.datetime.now()) + " #### Finished precision calculation for threshold " + str(threshold) + " - precision: " + str(precision))
 
 
-Tester.test_precision()
+# Tester.test_precision()
 main()
