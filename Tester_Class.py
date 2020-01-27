@@ -139,6 +139,7 @@ class Tester:
     def test_precision():
         pred_path = 'test/pred.csv'
         actual_path = 'test/actual.csv'
+        actual_path_w_heading = 'test/actual_w_heading.csv'
         analyser = ABCUseCaseAnalyser()
 
         with open(actual_path, 'w', newline='\n') as a:
@@ -150,29 +151,50 @@ class Tester:
         # correct prediction
         with open(pred_path, 'w', newline='\n') as p:
             w2 = csv.writer(p, delimiter=analyser.delimiter)
-            w2.writerow(['1c', 'a', "0a", 2])
-            w2.writerow(['0a', 'b', "1b", 1])
+            w2.writerow(['1c', 'a', "0a", 1])
+            w2.writerow(['0a', 'b', "1b", 0])
             w2.writerow(['1b', 'b', "1b", 0])
 
-        precision = analyser.get_precision(actual_path, pred_path, 0, 2, 2)
+        precision = analyser.get_precision(actual_path, pred_path, 0, 0, 2, 2)
         assert (precision == 1.0)
 
         # semi correct prediction
         with open(pred_path, 'w', newline='\n') as p:
             w2 = csv.writer(p, delimiter=analyser.delimiter)
             w2.writerow(['1c', 'a', "0a", 1])
-            w2.writerow(['0a', 'b', "1b", 1])
+            w2.writerow(['0a', 'b', "1b", -1])
             w2.writerow(['1b', 'b', "1b", 0])
 
-        precision = analyser.get_precision(actual_path, pred_path, 0, 2, 2)
+        precision = analyser.get_precision(actual_path, pred_path, 0, 0, 2, 2)
         assert (precision == 0.5)
 
         # wrong prediction
         with open(pred_path, 'w', newline='\n') as p:
             w2 = csv.writer(p, delimiter=analyser.delimiter)
+            w2.writerow(['1c', 'a', "0a", -1])
+            w2.writerow(['0a', 'b', "1b", -1])
+            w2.writerow(['1b', 'b', "1b", 2])
+
+        precision = analyser.get_precision(actual_path, pred_path, 0, 0, 2, 2)
+        assert (precision == 0.0)
+
+        # test correct row representation (that actual and predicted row match) with headline
+        with open(actual_path_w_heading, 'w', newline='\n') as a:
+            w = csv.writer(a, delimiter=analyser.delimiter)
+            w.writerow(['Event Type'])
+            w.writerow(['a'])  # 1c -> 0a
+            w.writerow(['b'])  # 0a -> 1b
+            w.writerow(['b'])  # 1b -> 1b
+
+        # correct prediction
+        with open(pred_path, 'w', newline='\n') as p:
+            w2 = csv.writer(p, delimiter=analyser.delimiter)
             w2.writerow(['1c', 'a', "0a", 1])
             w2.writerow(['0a', 'b', "1b", 0])
-            w2.writerow(['1b', 'b', "1b", 0])  # TODO do we want to allow predictions of 0?
+            w2.writerow(['1b', 'b', "1b", 0])
 
-        precision = analyser.get_precision(actual_path, pred_path, 0, 2, 2)
-        assert (precision == 0.0)
+        # # This is supposed to fail!
+        # analyser.get_precision(actual_path_w_heading, pred_path, 0, 0, 2, 2)
+
+        precision = analyser.get_precision(actual_path_w_heading, pred_path, 1, 0, 2, 2)
+        assert(precision == 1.0)
