@@ -81,7 +81,6 @@ class UseCaseAnalyser:
     def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path, max_distance, threshold):
         with open(data_path, encoding='windows-1252') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
-            next(csv_reader)
             current_state = dfa.start_state[0]
 
             # skip unwanted log entries
@@ -96,7 +95,7 @@ class UseCaseAnalyser:
 
                     # iterate over events and predict the shortest path that leads to an accepting state
                     # with p > threshold
-                    spread = self.find_spread(new_state, max_distance, threshold)
+                    spread = self.find_spread3(new_state, max_distance, threshold)
 
                     csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
                     current_state = new_state
@@ -105,10 +104,10 @@ class UseCaseAnalyser:
     def find_spread(self, current_state, max_distance, threshold):
         if current_state in self.final_states:
             return 0
-        for possible_spread in range(0, max_distance):
-            result = self.check_spread(possible_spread+1, threshold, current_state)
+        for possible_spread in range(1, max_distance + 1):
+            result = self.check_spread(possible_spread, threshold, current_state)
             if result == 1:
-                return possible_spread+1
+                return possible_spread
         return -1
 
     def check_spread(self, depth, threshold, current_state):
@@ -128,7 +127,7 @@ class UseCaseAnalyser:
     def calculate_spread_probabilities(self, depth, state):
         if depth <= 0:
             if state not in self.final_states:
-                return[0.0]
+                return [0.0]
             return []
 
         probabilities = []
@@ -144,7 +143,7 @@ class UseCaseAnalyser:
                     i += 1
 
                 else:
-                    next_probabilities = self.calculate_spread_probabilities(depth-1, next_state)
+                    next_probabilities = self.calculate_spread_probabilities(depth - 1, next_state)
 
                     for next_probs in next_probabilities:
                         probabilities.append([])
@@ -163,7 +162,40 @@ class UseCaseAnalyser:
 
         return probabilities
 
-    def get_precision(self, actual_data_path, predicted_data_path, actual_log_begin, predicted_log_begin, predicted_log_end, max_spread):
+    def find_spread3(self, current_state, max_distance, threshold):
+        queue = []
+        final_state_probs = {}
+        for f in self.final_states:
+            final_state_probs[self.states.index(f)] = FinalState(0.0, 0)
+        current_state_index = self.states.index(current_state)
+        # Step 1: Add all level 1 states to queue
+        for neighbor_index, neighbor_prob in enumerate(self.trained_matrix[current_state_index]):
+            if neighbor_prob[0] != 0:
+                if self.states[neighbor_index] in self.final_states and neighbor_prob[0] > threshold:
+                    return 1
+                if neighbor_index in final_state_probs.keys():
+                    final_state_probs[neighbor_index].p += neighbor_prob[0]
+                    final_state_probs[neighbor_index].s = 1
+                queue.append(QueueState(neighbor_index, 1, neighbor_prob[0]))
+        # Step 2: Successively browse higher distances
+        while queue:
+            e = queue[0]
+            queue.remove(e)
+            # Unsuccessful ending condition
+            if e.d > max_distance:
+                return -1
+            for neighbor_index, neighbor_prob in enumerate(self.trained_matrix[e.i]):
+                if neighbor_prob[0] != 0:
+                    if neighbor_index in final_state_probs.keys():
+                        final_state_probs[neighbor_index].p += e.p * neighbor_prob[0]
+                        final_state_probs[neighbor_index].s = e.d + 1
+                        # Successful ending condition
+                        if final_state_probs[neighbor_index].p > threshold:
+                            return final_state_probs[neighbor_index].s
+                    queue.append(QueueState(neighbor_index, e.d + 1, e.p * neighbor_prob[0]))
+
+    def get_precision(self, actual_data_path, predicted_data_path, actual_log_begin, predicted_log_begin,
+                      predicted_log_end, max_spread):
         with open(predicted_data_path, encoding='windows-1252') as predicted_file:
             precision_score = []
             predicted_reader = csv.reader(predicted_file, delimiter=self.delimiter)
@@ -182,7 +214,7 @@ class UseCaseAnalyser:
                     for j in range(0, actual_log_begin + i):
                         next(actual_reader)
                     event_leading_to_current_state = self.access_event(next(actual_reader))
-                    assert(event_leading_to_current_state == predicted_row[1])
+                    assert (event_leading_to_current_state == predicted_row[1])
                     # case for prediction that final state is not reached in next max_spread events
                     if predicted_spread == -1:
                         prediction_correct = 1
@@ -210,7 +242,7 @@ class UseCaseAnalyser:
                                 prediction_correct = 1
                                 break
                     precision_score.append(prediction_correct)
-            return sum(precision_score)/len(precision_score)
+            return sum(precision_score) / len(precision_score)
 
 
 """
@@ -433,3 +465,16 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
                     count += 1
 
         return event_types
+
+
+class FinalState:
+    def __init__(self, p, s):
+        self.p = p
+        self.s = s
+
+
+class QueueState:
+    def __init__(self, index, distance, probability):
+        self.i = index
+        self.d = distance
+        self.p = probability
