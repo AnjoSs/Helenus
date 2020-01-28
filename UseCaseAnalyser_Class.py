@@ -96,71 +96,13 @@ class UseCaseAnalyser:
                     # iterate over events and predict the shortest path that leads to an accepting state
                     # with p > threshold
                     spread = self.find_spread3(new_state, max_distance, threshold)
+                    # edge case for small dataset
+                    if spread is None:
+                        spread = -1
 
                     csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
                     current_state = new_state
         return
-
-    def find_spread(self, current_state, max_distance, threshold):
-        if current_state in self.final_states:
-            return 0
-        for possible_spread in range(1, max_distance + 1):
-            result = self.check_spread(possible_spread, threshold, current_state)
-            if result == 1:
-                return possible_spread
-        return -1
-
-    def check_spread(self, depth, threshold, current_state):
-        probabilities = self.calculate_spread_probabilities(depth, current_state)
-        probability = 0
-
-        for path in probabilities:
-            path_prob = 1
-            for event_prob in path:
-                path_prob = path_prob * event_prob
-            probability = probability + path_prob
-
-        if probability >= threshold:
-            return 1
-        return 0
-
-    def calculate_spread_probabilities(self, depth, state):
-        if depth <= 0:
-            if state not in self.final_states:
-                return [0.0]
-            return []
-
-        probabilities = []
-        i = 0
-        for pos in range(0, len(self.trained_matrix[self.states.index(state)])):
-            prob = self.trained_matrix[self.states.index(state)][pos][0]
-            if prob != 0:
-                next_state = self.states[pos]
-
-                if next_state in self.final_states:
-                    probabilities.append([])
-                    probabilities[i].append(prob)
-                    i += 1
-
-                else:
-                    next_probabilities = self.calculate_spread_probabilities(depth - 1, next_state)
-
-                    for next_probs in next_probabilities:
-                        probabilities.append([])
-                        probabilities[i].append(prob)
-                        if isinstance(next_probs, list):
-                            for next_prob in next_probs:
-                                probabilities[i].append(next_prob)
-                        if isinstance(next_probs, float):
-                            probabilities[i].append(next_probs)
-                        i += 1
-
-                    if next_probabilities == []:
-                        probabilities.append([])
-                        probabilities[i].append(prob)
-                        i += 1
-
-        return probabilities
 
     def find_spread3(self, current_state, max_distance, threshold):
         queue = []
