@@ -28,16 +28,17 @@ def main():
         logging.info(str(datetime.datetime.now()) + " ## Starting increasing unambiguity: " + str(order))
         dfa_bpi19.increase_unambiguity(order)
         logging.info(str(datetime.datetime.now()) + " ## Finished increasing unambiguity: " + str(order))
-        logging.info(str(datetime.datetime.now()) + " ## Starting training matrix")
-        bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', training_log_size)
-        logging.info(str(datetime.datetime.now()) + " ## Finished training matrix")
-        with open('logs/trainedMatrixBPI19.csv', 'w') as matrix_file:
-            csv.writer(matrix_file).writerow(str(bpi19_analyser.trained_matrix))
-        data_path = 'data/bpi19.csv'
         tested_thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         max_distances = [5, 10, 40]  # TODO change to something way bigger (5 for 3 event types --> for 40 event types: 40-67!
         logging.info(str(datetime.datetime.now()) + " ## Starting tests with order " + str(order))
         for distance in max_distances:
+            logging.info(str(datetime.datetime.now()) + " ## Starting training matrix")
+            # TODO auslagern
+            bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', training_log_size, distance)
+            logging.info(str(datetime.datetime.now()) + " ## Finished training matrix")
+            with open('logs/trainedMatrixBPI19-' + str(order) + '-' + str(distance) + '.csv', 'w') as matrix_file:
+                csv.writer(matrix_file).writerow(str(bpi19_analyser.trained_matrix))
+            data_path = 'data/bpi19.csv'
             print("Processing distance: " + str(distance))
             logging.info(str(datetime.datetime.now()) + " ### Starting tests for max_distance: " + str(distance))
             for threshold in tested_thresholds:
