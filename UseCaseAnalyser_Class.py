@@ -1,6 +1,7 @@
 import csv
 import copy
 import abc
+import numpy as np
 
 from DFA_Class import DFA
 from State_Transition_Matrix_Class import State_Transition_Matrix
@@ -15,8 +16,10 @@ class UseCaseAnalyser:
         self.alphabet = self.get_alphabet()
         self.initial_matrix = self.get_matrix()
         self.dfa = self.get_dfa()
-        self.trained_matrix = {}
+        self.trained_matrix = np.array([])
         self.delimiter = ';'
+        self.depth_matrices = {}
+        self.depth_final_state_probability = {}
 
     @abc.abstractmethod
     def get_states(self):
@@ -45,16 +48,15 @@ class UseCaseAnalyser:
     def get_dfa(self):
         return DFA(self.states, self.start_state, self.alphabet, self.final_states, self.initial_matrix)
 
-    def train_matrix(self, dfa, data_path, training_count):
+    def train_matrix(self, dfa, data_path, training_count, max_distance):
         # Copy original matrix + fill with 0
         # plus: save for each state how often it was visited to compute percentages
         matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
         state_visits = []
         for event in matrix:
             state_visits.append(0)
-            for col in event:
-                col.clear()
-                col.append(0)
+            for i in range(0, len(event)):
+                event[i] = 0
 
         # replay log entries + count transitions
         with open(data_path, encoding='windows-1252') as csv_file:
@@ -66,17 +68,39 @@ class UseCaseAnalyser:
                 next_event = self.access_event(next(csv_reader))
                 next_state = dfa.delta(current_state, next_event)
                 matrix[dfa.state_transition_matrix.state_list.index(current_state)][
-                    dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
+                    dfa.state_transition_matrix.state_list.index(next_state)] += 1
                 current_state = next_state
 
         # calculate percentage
         for row in matrix:
-            for col in row:
+            for i in range(0, len(row)):
                 if state_visits[matrix.index(row)] != 0:
-                    col[0] = col[0] / state_visits[matrix.index(row)]
+                    row[i] = row[i] / state_visits[matrix.index(row)]
 
-        self.trained_matrix = matrix
+        self.trained_matrix = np.array(matrix)
+        self.compute_depth_matrices(max_distance)
         return
+
+    def compute_depth_matrices(self, max_distance):
+        final_states_vector = np.array([[]])
+        for state in self.states:
+            if state in self.final_states:
+                final_states_vector = np.concatenate((final_states_vector, np.array([[1]])), axis=1)
+            else:
+                final_states_vector = np.concatenate((final_states_vector, np.array([[0]])), axis=1)
+        final_states_vector = final_states_vector.T
+        nulling_matrix = np.identity(len(self.states))
+        for idx, state in enumerate(self.states):
+            if state in self.final_states:
+                nulling_matrix[idx][idx] = 0
+
+        for depth in range(1, max_distance + 1):
+            if depth == 1:
+                depth_matrix = self.trained_matrix
+            else:
+                depth_matrix = self.depth_matrices[depth-1].dot(self.trained_matrix)
+            self.depth_final_state_probability[depth] = depth_matrix.dot(final_states_vector)
+            self.depth_matrices[depth] = depth_matrix.dot(nulling_matrix)
 
     def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path, max_distance, threshold):
         with open(data_path, encoding='windows-1252') as csv_file:
@@ -95,7 +119,7 @@ class UseCaseAnalyser:
 
                     # iterate over events and predict the shortest path that leads to an accepting state
                     # with p > threshold
-                    spread = self.find_spread3(new_state, max_distance, threshold)
+                    spread = self.find_spread(new_state, max_distance, threshold)
                     # edge case for small dataset
                     if spread is None:
                         spread = -1
@@ -104,37 +128,15 @@ class UseCaseAnalyser:
                     current_state = new_state
         return
 
-    def find_spread3(self, current_state, max_distance, threshold):
-        queue = []
-        final_state_probs = {}
-        for f in self.final_states:
-            final_state_probs[self.states.index(f)] = FinalState(0.0, 0)
-        current_state_index = self.states.index(current_state)
-        # Step 1: Add all level 1 states to queue
-        for neighbor_index, neighbor_prob in enumerate(self.trained_matrix[current_state_index]):
-            if neighbor_prob[0] != 0:
-                if self.states[neighbor_index] in self.final_states and neighbor_prob[0] > threshold:
-                    return 1
-                if neighbor_index in final_state_probs.keys():
-                    final_state_probs[neighbor_index].p += neighbor_prob[0]
-                    final_state_probs[neighbor_index].s = 1
-                queue.append(QueueState(neighbor_index, 1, neighbor_prob[0]))
-        # Step 2: Successively browse higher distances
-        while queue:
-            e = queue[0]
-            queue.remove(e)
-            # Unsuccessful ending condition
-            if e.d > max_distance:
-                return -1
-            for neighbor_index, neighbor_prob in enumerate(self.trained_matrix[e.i]):
-                if neighbor_prob[0] != 0:
-                    if neighbor_index in final_state_probs.keys():
-                        final_state_probs[neighbor_index].p += e.p * neighbor_prob[0]
-                        final_state_probs[neighbor_index].s = e.d + 1
-                        # Successful ending condition
-                        if final_state_probs[neighbor_index].p > threshold:
-                            return final_state_probs[neighbor_index].s
-                    queue.append(QueueState(neighbor_index, e.d + 1, e.p * neighbor_prob[0]))
+    def find_spread(self, current_state, max_distance, threshold):
+        if current_state in self.final_states:
+            return 0
+        prob = 0
+        for possible_spread in range(1, max_distance + 1):
+            prob += self.depth_final_state_probability[possible_spread][self.states.index(current_state)]
+            if prob >= threshold:
+                return possible_spread
+        return -1
 
     def get_precision(self, actual_data_path, predicted_data_path, actual_log_begin, predicted_log_begin,
                       predicted_log_end, max_spread):
