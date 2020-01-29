@@ -2,6 +2,7 @@ from State_Transition_Matrix_Class import State_Transition_Matrix
 from DFA_Class import DFA
 from UseCaseAnalyser_Class import BPIUseCaseAnalyser, ABCUseCaseAnalyser, BPI19UseCaseAnalyser
 from Tester_Class import Tester
+import datetime
 
 
 def main():
@@ -57,21 +58,41 @@ def main():
     # print(p)
 
     """ ABC use case for testing """
+    threshold = 0.9
+    max_distance = 50
     abc_analyser = ABCUseCaseAnalyser()
     dfa = abc_analyser.get_dfa()
     print("Starting unambiguity 1")
-    dfa.increase_unambiguity(1)  # should not change anything
-    print(dfa.state_transition_matrix.matrix)
-
-    threshold = 0.9
-    max_distance = 10
-    print("Starting training")
-    abc_analyser.train_matrix(dfa, 'data/abc_fixed.csv', 999)
+    dfa.increase_unambiguity(1)
+    abc_analyser.train_matrix(dfa, 'data/abc_fixed.csv', 999, max_distance)
     Tester.test_correct_trained_matrix_abc(abc_analyser.trained_matrix)
     print("Starting prediction")
+    start = datetime.datetime.now()
     abc_analyser.predict_matrix(dfa, 'data/abc_fixed.csv', 0, 100, 'results/abc.csv', max_distance, threshold)
+    duration = datetime.datetime.now() - start
+    print("Prediction Order 1: " + str(duration))
     Tester.test_correct_prediction_abc(abc_analyser)
-    p = abc_analyser.get_precision('data/abc_fixed.csv', 'results/abc.csv', 0, 100, max_distance)
+    p = abc_analyser.get_precision('data/abc_fixed.csv', 'results/abc.csv', 0, 0, 100, max_distance)
+    print(p)
+
+    dfa.increase_unambiguity(2)
+    abc_analyser.train_matrix(dfa, 'data/abc_fixed.csv', 999, max_distance)
+    print("Starting prediction")
+    start = datetime.datetime.now()
+    abc_analyser.predict_matrix(dfa, 'data/abc_fixed.csv', 0, 100, 'results/abc.csv', max_distance, threshold)
+    duration = datetime.datetime.now() - start
+    print("Prediction Order 2: " + str(duration))
+    p = abc_analyser.get_precision('data/abc_fixed.csv', 'results/abc.csv', 0, 0, 100, max_distance)
+    print(p)
+
+    dfa.increase_unambiguity(3)
+    abc_analyser.train_matrix(dfa, 'data/abc_fixed.csv', 999, max_distance)
+    print("Starting prediction")
+    start = datetime.datetime.now()
+    abc_analyser.predict_matrix(dfa, 'data/abc_fixed.csv', 0, 100, 'results/abc.csv', max_distance, threshold)
+    duration = datetime.datetime.now() - start
+    print("Prediction Order 3: " + str(duration))
+    p = abc_analyser.get_precision('data/abc_fixed.csv', 'results/abc.csv', 0, 0, 100, max_distance)
     print(p)
 
     """ BPI19 use case """

@@ -62,10 +62,10 @@ class Tester:
     # 0c    0   0.2 0.2 0.6
     @staticmethod
     def test_correct_trained_matrix_abc(trained_matrix):
-        for row in trained_matrix:
+        for i in range(0, len(trained_matrix)):
             percentage_sum = 0
-            for col in row:
-                percentage_sum += col
+            for j in range(0, len(trained_matrix)):
+                percentage_sum += trained_matrix[i, j]
             assert (round(percentage_sum, 3) == 1.0)
 
         assert (round(trained_matrix[0][0], 1) == 0.6)
