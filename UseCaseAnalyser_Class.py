@@ -1,6 +1,7 @@
 import csv
 import copy
 import abc
+import numpy as np
 
 from DFA_Class import DFA
 from State_Transition_Matrix_Class import State_Transition_Matrix
@@ -52,9 +53,8 @@ class UseCaseAnalyser:
         state_visits = []
         for event in matrix:
             state_visits.append(0)
-            for col in event:
-                col.clear()
-                col.append(0)
+            for i in range(0, len(event)):
+                event[i] = 0
 
         # replay log entries + count transitions
         with open(data_path) as csv_file:
@@ -66,16 +66,19 @@ class UseCaseAnalyser:
                 next_event = self.access_event(next(csv_reader))
                 next_state = dfa.delta(current_state, next_event)
                 matrix[dfa.state_transition_matrix.state_list.index(current_state)][
-                    dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
+                    dfa.state_transition_matrix.state_list.index(next_state)] += 1
                 current_state = next_state
 
         # calculate percentage
         for row in matrix:
-            for col in row:
+            for i in range(0, len(row)):
                 if state_visits[matrix.index(row)] != 0:
-                    col[0] = col[0] / state_visits[matrix.index(row)]
+                    row[i] = row[i] / state_visits[matrix.index(row)]
+
 
         self.trained_matrix = matrix
+        print(matrix)
+        print(np.matrix(matrix))
         return
 
     def predict_matrix(self, dfa, data_path, log_begin, log_end, result_path, max_distance, threshold):
@@ -133,7 +136,7 @@ class UseCaseAnalyser:
         probabilities = []
         i = 0
         for pos in range(0, len(self.trained_matrix[self.states.index(state)])):
-            prob = self.trained_matrix[self.states.index(state)][pos][0]
+            prob = self.trained_matrix[self.states.index(state)][pos]
             if prob != 0:
                 next_state = self.states[pos]
 
@@ -170,13 +173,13 @@ class UseCaseAnalyser:
         current_state_index = self.states.index(current_state)
         # Step 1: Add all level 1 states to queue
         for neighbor_index, neighbor_prob in enumerate(self.trained_matrix[current_state_index]):
-            if neighbor_prob[0] != 0:
-                if self.states[neighbor_index] in self.final_states and neighbor_prob[0] > threshold:
+            if neighbor_prob != 0:
+                if self.states[neighbor_index] in self.final_states and neighbor_prob > threshold:
                     return 1
                 if neighbor_index in final_state_probs.keys():
-                    final_state_probs[neighbor_index].p += neighbor_prob[0]
+                    final_state_probs[neighbor_index].p += neighbor_prob
                     final_state_probs[neighbor_index].s = 1
-                queue.append(QueueState(neighbor_index, 1, neighbor_prob[0]))
+                queue.append(QueueState(neighbor_index, 1, neighbor_prob))
         # Step 2: Successively browse higher distances
         while queue:
             e = queue[0]
@@ -185,14 +188,14 @@ class UseCaseAnalyser:
             if e.d > max_distance:
                 return -1
             for neighbor_index, neighbor_prob in enumerate(self.trained_matrix[e.i]):
-                if neighbor_prob[0] != 0:
+                if neighbor_prob != 0:
                     if neighbor_index in final_state_probs.keys():
-                        final_state_probs[neighbor_index].p += e.p * neighbor_prob[0]
+                        final_state_probs[neighbor_index].p += e.p * neighbor_prob
                         final_state_probs[neighbor_index].s = e.d + 1
                         # Successful ending condition
                         if final_state_probs[neighbor_index].p > threshold:
                             return final_state_probs[neighbor_index].s
-                    queue.append(QueueState(neighbor_index, e.d + 1, e.p * neighbor_prob[0]))
+                    queue.append(QueueState(neighbor_index, e.d + 1, e.p * neighbor_prob))
 
     def get_precision(self, actual_data_path, predicted_data_path, actual_log_begin, predicted_log_begin,
                       predicted_log_end, max_spread):
