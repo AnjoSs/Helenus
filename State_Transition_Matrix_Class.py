@@ -6,11 +6,11 @@ class State_Transition_Matrix:
         self.alphabet = alphabet
         self.matrix = matrix
 
-
+    # TODO use transformed matrix instead?!
     def get_predecessor_states(self, state):
         predecessors = []
-        for i in range(0, len(self.state_list)):
-            if self.matrix[i][self.state_list.index(state)] != []:
+        for i in range(0, len(self.state_list)- 1):
+            if self.matrix[i][self.state_list.index(state)]:
                 predecessors.append(self.state_list[i])
         return predecessors
 
