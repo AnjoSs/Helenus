@@ -59,28 +59,12 @@ class State_Transition_Matrix:
 
 
     def insert_state(self, state):
-        #self.matrix.append([])
-        #for i in range(0, len(self.state_list)):
-        #    self.matrix[len(self.state_list)].append([])
-        #    print(self.matrix)
-
-        #self.state_list.append(state)
-        #for i in range(0, len(self.state_list)):
-        #    print(i)
-        #    print(self.matrix[i])
-        #    self.matrix[i].append([])
-        #    print(self.matrix)
-
-
         self.state_list.append(state)
         self.matrix.append([])
-        #print(self.matrix)
-        for i in range(0, len(self.state_list) - 1):
+        for i in range(0, len(self.state_list)):
             self.matrix[self.state_list.index(state)].append([])
-            #print(self.matrix)
             if i < len(self.state_list)-1:
                 self.matrix[i].append([])
-                #print(self.matrix)
 
 
     def delta(self, state, letter):
@@ -97,25 +81,18 @@ class State_Transition_Matrix:
         self.matrix[self.state_list.index(target)] = copy.deepcopy(self.matrix[self.state_list.index(source)])
 
     def transpose_matrix(self):
-        transposed_matrix = copy.deepcopy(self.matrix)
-        for row_idx in range(0, len(self.matrix)):
-            for col_idx in range(0, len(self.matrix[0])):
-                transposed_matrix[col_idx][row_idx] = copy.deepcopy(self.matrix[row_idx][col_idx])
-        return transposed_matrix
-        # transposed_matrix = []
-        # #print(self.matrix)
-        # #print(range(len(self.matrix)))
-        # for row_id in range(0, len(self.matrix)):
-        #     #print('column: ' + str(column))
-        #     transposed_matrix.append([])
-        #     #print(transposed_matrix)
-        #     #print(self.matrix[column])
-        #     #print(range(len(self.matrix[column])))
-        #     for column_id in range(0, len(self.matrix[row_id])):
-        #         #print(row)
-        #         #print(transposed_matrix)
-        #         transposed_matrix[row_id].append(self.matrix[column_id][row_id])
+        # transposed_matrix = copy.deepcopy(self.matrix)
+        # for row_idx in range(0, len(self.matrix)):
+        #     for col_idx in range(0, len(self.matrix[0])):
+        #         transposed_matrix[col_idx][row_idx] = copy.deepcopy(self.matrix[row_idx][col_idx])
         # return transposed_matrix
+
+        transposed_matrix = []
+        for original_col_id in range(0, len(self.matrix[0])):
+            transposed_matrix.append([])
+            for original_row_id in range(0, len(self.matrix)):
+                transposed_matrix[original_col_id].append(self.matrix[original_row_id][original_col_id])
+        return transposed_matrix
 
 
     def add_transition(self, source, target, letter):
