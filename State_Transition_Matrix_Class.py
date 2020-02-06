@@ -32,7 +32,7 @@ class State_Transition_Matrix:
 
         #print('get_paths: ' + str(depth) + current_state)
         paths = []
-        for letter_pos in range(0, len(matrix[self.state_list.index(current_state)])):
+        for letter_pos in range(0, len(matrix[self.state_list.index(current_state)]) - 1):
             #print(letter_pos)
             if matrix[self.state_list.index(current_state)][letter_pos] != []:
                 letters = matrix[self.state_list.index(current_state)][letter_pos]
@@ -75,7 +75,7 @@ class State_Transition_Matrix:
         self.state_list.append(state)
         self.matrix.append([])
         #print(self.matrix)
-        for i in range(0, len(self.state_list)):
+        for i in range(0, len(self.state_list) - 1):
             self.matrix[self.state_list.index(state)].append([])
             #print(self.matrix)
             if i < len(self.state_list)-1:
@@ -96,22 +96,26 @@ class State_Transition_Matrix:
     def copy_delta(self, source, target):
         self.matrix[self.state_list.index(target)] = copy.deepcopy(self.matrix[self.state_list.index(source)])
 
-
     def transpose_matrix(self):
-        transposed_matrix = []
-        #print(self.matrix)
-        #print(range(len(self.matrix)))
-        for column in range(len(self.matrix)):
-            #print('column: ' + str(column))
-            transposed_matrix.append([])
-            #print(transposed_matrix)
-            #print(self.matrix[column])
-            #print(range(len(self.matrix[column])))
-            for row in range(len(self.matrix[column])):
-                #print(row)
-                #print(transposed_matrix)
-                transposed_matrix[column].append(self.matrix[row][column])
+        transposed_matrix = copy.deepcopy(self.matrix)
+        for row_idx in range(0, len(self.matrix)):
+            for col_idx in range(0, len(self.matrix[0])):
+                transposed_matrix[col_idx][row_idx] = copy.deepcopy(self.matrix[row_idx][col_idx])
         return transposed_matrix
+        # transposed_matrix = []
+        # #print(self.matrix)
+        # #print(range(len(self.matrix)))
+        # for row_id in range(0, len(self.matrix)):
+        #     #print('column: ' + str(column))
+        #     transposed_matrix.append([])
+        #     #print(transposed_matrix)
+        #     #print(self.matrix[column])
+        #     #print(range(len(self.matrix[column])))
+        #     for column_id in range(0, len(self.matrix[row_id])):
+        #         #print(row)
+        #         #print(transposed_matrix)
+        #         transposed_matrix[row_id].append(self.matrix[column_id][row_id])
+        # return transposed_matrix
 
 
     def add_transition(self, source, target, letter):
