@@ -41,7 +41,7 @@ class DFA:
             while len(pre_paths) > 1:
                 #print("pre_path length: " + str(len(pre_paths)))
                 a = pre_paths[0]
-                qa = q + str(pre_paths[0])
+                qa = q + str(pre_paths[0]) + "_" + str(order)
                 #print('choosen word: ' + a)
                 #print('new state: ' + qa)
 
