@@ -170,11 +170,17 @@ class UseCaseAnalyser:
                                 prediction_correct = 0
                                 break
                     elif predicted_spread == 0:
-                        next_row = next(actual_reader)
-                        next_event = self.access_event(next_row)  # next?event == predicted?row[1]
-                        actual_next_state = self.dfa.delta(current_state, next_event)
-                        if actual_next_state in self.dfa.final_states:
+                        if current_state in self.final_states:
                             prediction_correct = 1
+                        else:
+                            print("error")
+                        # next_row = next(actual_reader)
+                        # next_event = self.access_event(next_row)  # next?event == predicted?row[1]
+                        # actual_next_state = self.dfa.delta(current_state, next_event)
+                        # if actual_next_state in self.dfa.final_states:
+                        #     prediction_correct = 1
+                        # else:
+                        #     print("error")
                     else:
                         prediction_correct = 0
                         # check for predicted_spread many actual events if they lead to a final state or not
@@ -422,3 +428,36 @@ class QueueState:
         self.i = index
         self.d = distance
         self.p = probability
+
+
+"""
+LTL: G(m -> Fs) with alphabet [m,s,c]
+"""
+
+
+class MateUseCaseAnalyser(UseCaseAnalyser):
+    def __init__(self):
+        super().__init__()
+
+    def get_states(self):
+        return ['1', '0']
+
+    def get_final_states(self):
+        return ['1']
+
+    def get_start_state(self):
+        return ['1']
+
+    def get_alphabet(self):
+        return ['m', 's', 'c']
+
+    def access_event(self, row):
+        return row[0]
+
+    #     1     0
+    # 1   s,c   m
+    # 0   s    m,c
+    def get_matrix(self):
+        matrix = [[['s', 'c'], ['m']],
+                  [['s'], ['m', 'c']]]
+        return State_Transition_Matrix(self.states, self.alphabet, matrix)
