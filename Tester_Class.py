@@ -98,7 +98,7 @@ class Tester:
         for row in trained_matrix:
             percentage_sum = 0
             for col in row:
-                percentage_sum += col[0]
+                percentage_sum += col
             assert (round(percentage_sum, 3) == 1.0 or percentage_sum == 0)
 
     @staticmethod
