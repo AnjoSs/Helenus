@@ -9,7 +9,7 @@ class State_Transition_Matrix:
     # TODO use transformed matrix instead?!
     def get_predecessor_states(self, state):
         predecessors = []
-        for i in range(0, len(self.state_list)- 1):
+        for i in range(0, len(self.state_list)):
             if self.matrix[i][self.state_list.index(state)]:
                 predecessors.append(self.state_list[i])
         return predecessors
@@ -57,7 +57,6 @@ class State_Transition_Matrix:
         #print(transpose_matrix)
         return list(set(self.get_paths(transpose_matrix, depth, current_state)))
 
-
     def insert_state(self, state):
         self.state_list.append(state)
         self.matrix.append([])
@@ -66,7 +65,6 @@ class State_Transition_Matrix:
             if i < len(self.state_list)-1:
                 self.matrix[i].append([])
 
-
     def delta(self, state, letter):
         row = self.matrix[self.state_list.index(state)]
         if letter in row:
@@ -74,8 +72,6 @@ class State_Transition_Matrix:
         for col in row:
             if letter in col:
                 return self.state_list[row.index(col)]
-
-
 
     def copy_delta(self, source, target):
         self.matrix[self.state_list.index(target)] = copy.deepcopy(self.matrix[self.state_list.index(source)])
