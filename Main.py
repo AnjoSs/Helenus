@@ -1,6 +1,7 @@
 from State_Transition_Matrix_Class import State_Transition_Matrix
 from DFA_Class import DFA
-from UseCaseAnalyser_Class import BPIUseCaseAnalyser, ABCUseCaseAnalyser, BPI19UseCaseAnalyser, MateUseCaseAnalyser
+from UseCaseAnalyser_Class import BPIUseCaseAnalyser, ABCUseCaseAnalyser, BPI19UseCaseAnalyser, MateUseCaseAnalyser, \
+    AutoUseCaseAnalyser
 from Tester_Class import Tester
 import datetime
 
@@ -126,6 +127,22 @@ def main():
     # print("Prediction Order 2: " + str(duration))
     # p = mate_analyser.get_precision('data/mate.csv', 'results/mate2.csv', 0, 0, 100, max_distance)
     # print(p)
+
+    """ Auto Use Case """
+    # auto_analyser = AutoUseCaseAnalyser()
+    # dfa_auto = auto_analyser.get_dfa()
+    #
+    # threshold = 0.7
+    # max_distance = 10
+    # dfa_auto.increase_unambiguity(1)
+    # Tester.test_unambiguous(dfa_auto)
+    # print("Starting training")
+    # auto_analyser.train_matrix(dfa_auto, 'data/auto.csv', 1000, max_distance, True)
+    # Tester.test_correct_trained_matrix_bpi19(auto_analyser.trained_matrix)
+    # print("Starting prediction")
+    # auto_analyser.predict_matrix(dfa_auto, 'data/auto_one_instance.csv', 0, 8, 'results/auto.csv', max_distance, threshold)
+    # precision = auto_analyser.get_precision('data/auto_one_instance.csv', 'results/auto.csv', 0, 0, 7, max_distance)
+    # print(precision)
 
 
 # Tester.test_precision()
