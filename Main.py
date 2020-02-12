@@ -6,35 +6,6 @@ import datetime
 
 
 def main():
-    """ Old hardcoded test cases """
-    # hardcoded input values for order 1 LTL: Fb
-    # states = ['A', 'B', 'B2']
-    # start_state = ['B']
-    # alphabet = ['a', 'b']
-    # final_states = ['A', 'B2']
-    # state_transition_matrix = [[['a'], [], ['b']], [['a'], ['b'], []], [['a'], [], ['b']]]
-    #
-    # # create DFA Object with a State Transition Matrix Object
-    # matrix1 = State_Transition_Matrix(states, alphabet, state_transition_matrix)
-    # dfa1 = DFA(states, start_state, alphabet, final_states, matrix1)
-    #
-    # dfa1.increase_unambiguity(2)
-    # Tester.test_correct_unambiguity_2(dfa1)
-    # #print('#########################################')
-    # #dfa1.increase_unambiguity(3)
-    #
-    # states = ['A', 'B']
-    # start_state = ['B']
-    # alphabet = ['a', 'b']
-    # final_states = ['B']
-    # state_transition_matrix = [[['a'], ['b']], [['a'], ['b']]]
-    # order = 2
-    #
-    # matrix2 = State_Transition_Matrix(states, alphabet, state_transition_matrix)
-    # dfa2 = DFA(states, start_state, alphabet, final_states, matrix2)
-
-################################################################################
-
     """ BPI11 use case"""
     # TODO something is wrong with this use case. if unambiguity is 2, the percentage per row is not 1.
     # probably due to not taking all event types and thus missing state transitions
@@ -64,6 +35,7 @@ def main():
     # dfa = mate_analyser.get_dfa()
     # print("Starting unambiguity 1")
     # dfa.increase_unambiguity(1)
+    # Tester.test_unambiguous(dfa)
     # mate_analyser.train_matrix(dfa, 'data/abc_fixed.csv', 999, max_distance)
     # Tester.test_correct_trained_matrix_abc(mate_analyser.trained_matrix)
     # print("Starting prediction")
@@ -76,6 +48,7 @@ def main():
     # print(p)
     #
     # dfa.increase_unambiguity(2)
+    # Tester.test_unambiguous(dfa)
     # mate_analyser.train_matrix(dfa, 'data/abc_fixed.csv', 999, max_distance)
     # print("Starting prediction")
     # start = datetime.datetime.now()
@@ -86,6 +59,7 @@ def main():
     # print(p)
     #
     # dfa.increase_unambiguity(3)
+    # Tester.test_unambiguous(dfa)
     # mate_analyser.train_matrix(dfa, 'data/abc_fixed.csv', 999, max_distance)
     # print("Starting prediction")
     # start = datetime.datetime.now()
@@ -96,19 +70,20 @@ def main():
     # print(p)
 
     """ BPI19 use case """
-    bpi19_analyser = BPI19UseCaseAnalyser()
-    dfa_bpi19 = bpi19_analyser.get_dfa()
+    auto_analyser = BPI19UseCaseAnalyser()
+    dfa_auto = auto_analyser.get_dfa()
 
     threshold = 0.8
     max_distance = 4
-    dfa_bpi19.increase_unambiguity(1)
+    dfa_auto.increase_unambiguity(1)
+    Tester.test_unambiguous(dfa_auto)
     # dfa_bpi19.increase_unambiguity(2)  # TODO takes ages!
     print("Starting training")
-    bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', 1000, max_distance)
-    Tester.test_correct_trained_matrix_bpi19(bpi19_analyser.trained_matrix)
+    auto_analyser.train_matrix(dfa_auto, 'data/bpi19.csv', 1000, max_distance, True)
+    Tester.test_correct_trained_matrix_bpi19(auto_analyser.trained_matrix)
     print("Starting prediction")
-    bpi19_analyser.predict_matrix(dfa_bpi19, 'data/bpi19.csv', 1, 200, 'results/bpi19.csv', max_distance, threshold)
-    precision = bpi19_analyser.get_precision('data/bpi19.csv', 'results/bpi19.csv', 1, 0, 199, max_distance)
+    auto_analyser.predict_matrix(dfa_auto, 'data/bpi19.csv', 1, 200, 'results/bpi19.csv', max_distance, threshold)
+    precision = auto_analyser.get_precision('data/bpi19.csv', 'results/bpi19.csv', 1, 0, 199, max_distance)
     print(precision)
 
     """ Mate use case """

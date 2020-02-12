@@ -47,7 +47,10 @@ class State_Transition_Matrix:
                     for next_path in next_paths:
                         #print(next_path)
                         #print(letter)
-                        paths.append(next_path + letter)
+                        if next_path == '':
+                            paths.append([letter])
+                        else:
+                            paths.append([next_path, letter])
         #print(paths)
         return paths
 
@@ -55,7 +58,8 @@ class State_Transition_Matrix:
     def get_prepaths(self, depth, current_state): # is still buggy
         transpose_matrix = self.transpose_matrix()
         #print(transpose_matrix)
-        return list(set(self.get_paths(transpose_matrix, depth, current_state)))
+        paths = self.get_paths(transpose_matrix, depth, current_state)
+        return [list(item) for item in set(tuple(path) for path in paths)]
 
     def insert_state(self, state):
         self.state_list.append(state)
