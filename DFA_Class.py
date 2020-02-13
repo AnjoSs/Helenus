@@ -12,8 +12,8 @@ class DFA:
     def get_predecessor_states(self, state):
         return self.state_transition_matrix.get_predecessor_states(state)
 
-    def get_prepaths(self, depth, current_state):
-        return self.state_transition_matrix.get_prepaths(depth, current_state)
+    def get_prepaths(self, depth, current_state, transposed_matrix=None):
+        return self.state_transition_matrix.get_prepaths(depth, current_state, transposed_matrix)
 
     def insert_state(self, state):
         return self.state_transition_matrix.insert_state(state)
@@ -43,8 +43,9 @@ class DFA:
                     self.final_states.append(qa)
 
                 self.copy_delta(q, qa)
+                transposed_matrix = self.state_transition_matrix.transpose_matrix()
                 for p in self.get_predecessor_states(q):
-                    if (self.delta(p, a[-1]) == q) and (a[:-1] in self.get_prepaths(order-1, p)):
+                    if (self.delta(p, a[-1]) == q) and (a[:-1] in self.get_prepaths(order-1, p, transposed_matrix)):
                         self.state_transition_matrix.remove_transition(p, q, a[-1])
                         self.state_transition_matrix.add_transition(p, qa, a[-1])
                 #for p in self.get_predecessor_states(q):
