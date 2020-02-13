@@ -9,7 +9,7 @@ class State_Transition_Matrix:
     # TODO use transformed matrix instead?!
     def get_predecessor_states(self, state):
         predecessors = []
-        for i in range(0, len(self.state_list)- 1):
+        for i in range(0, len(self.state_list)):
             if self.matrix[i][self.state_list.index(state)]:
                 predecessors.append(self.state_list[i])
         return predecessors
@@ -28,35 +28,33 @@ class State_Transition_Matrix:
 
     def get_paths(self, matrix, depth, current_state):
         if depth == 0:
-            return ['']
+            return [[]]
 
-        #print('get_paths: ' + str(depth) + current_state)
         paths = []
         for letter_pos in range(0, len(matrix[self.state_list.index(current_state)]) - 1):
-            #print(letter_pos)
-            if matrix[self.state_list.index(current_state)][letter_pos] != []:
+            if matrix[self.state_list.index(current_state)][letter_pos]:
                 letters = matrix[self.state_list.index(current_state)][letter_pos]
-                #print(letters)
 
                 for letter in letters:
-                    #print(letter)
                     next_state = self.state_list[letter_pos]
-                    #print(next_state)
                     next_paths = self.get_paths(matrix, depth-1, next_state)
-                    #print(next_paths)
                     for next_path in next_paths:
-                        #print(next_path)
-                        #print(letter)
-                        paths.append(next_path + letter)
-        #print(paths)
+                        if next_path == '':
+                            paths.append([letter])
+                        else:
+                            next_path.append(letter)
+                            paths.append(next_path)
         return paths
 
-
-    def get_prepaths(self, depth, current_state): # is still buggy
-        transpose_matrix = self.transpose_matrix()
-        #print(transpose_matrix)
-        return list(set(self.get_paths(transpose_matrix, depth, current_state)))
-
+    def get_prepaths(self, depth, current_state, transposed_matrix=None):  # is still buggy
+        if not transposed_matrix:
+            transposed_matrix = self.transpose_matrix()
+        paths = self.get_paths(transposed_matrix, depth, current_state)
+        unique_paths = []
+        for p in paths:
+            if p not in unique_paths:
+                unique_paths.append(p)
+        return unique_paths
 
     def insert_state(self, state):
         self.state_list.append(state)
@@ -66,7 +64,6 @@ class State_Transition_Matrix:
             if i < len(self.state_list)-1:
                 self.matrix[i].append([])
 
-
     def delta(self, state, letter):
         row = self.matrix[self.state_list.index(state)]
         if letter in row:
@@ -74,8 +71,6 @@ class State_Transition_Matrix:
         for col in row:
             if letter in col:
                 return self.state_list[row.index(col)]
-
-
 
     def copy_delta(self, source, target):
         self.matrix[self.state_list.index(target)] = copy.deepcopy(self.matrix[self.state_list.index(source)])

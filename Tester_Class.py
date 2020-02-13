@@ -98,7 +98,7 @@ class Tester:
         for row in trained_matrix:
             percentage_sum = 0
             for col in row:
-                percentage_sum += col[0]
+                percentage_sum += col
             assert (round(percentage_sum, 3) == 1.0 or percentage_sum == 0)
 
     @staticmethod
@@ -198,3 +198,10 @@ class Tester:
 
         precision = analyser.get_precision(actual_path_w_heading, pred_path, 1, 0, 2, 2)
         assert(precision == 1.0)
+
+    @staticmethod
+    def test_unambiguous(dfa):
+        matrix = dfa.state_transition_matrix.matrix
+        for row in matrix:
+            for col in row:
+                assert(len(col) == 1 or len(col) == 0)
