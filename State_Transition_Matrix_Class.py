@@ -28,7 +28,7 @@ class State_Transition_Matrix:
 
     def get_paths(self, matrix, depth, current_state):
         if depth == 0:
-            return ['']
+            return [[]]
 
         paths = []
         for letter_pos in range(0, len(matrix[self.state_list.index(current_state)]) - 1):
@@ -42,7 +42,8 @@ class State_Transition_Matrix:
                         if next_path == '':
                             paths.append([letter])
                         else:
-                            paths.append([next_path, letter])
+                            next_path.append(letter)
+                            paths.append(next_path)
         return paths
 
     def get_prepaths(self, depth, current_state):  # is still buggy
@@ -52,8 +53,6 @@ class State_Transition_Matrix:
         for p in paths:
             if p not in unique_paths:
                 unique_paths.append(p)
-        if unique_paths == ['']:
-            return [[]]
         return unique_paths
 
     def insert_state(self, state):
