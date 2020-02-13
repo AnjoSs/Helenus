@@ -46,9 +46,10 @@ class State_Transition_Matrix:
                             paths.append(next_path)
         return paths
 
-    def get_prepaths(self, depth, current_state):  # is still buggy
-        transpose_matrix = self.transpose_matrix()
-        paths = self.get_paths(transpose_matrix, depth, current_state)
+    def get_prepaths(self, depth, current_state, transposed_matrix=None):  # is still buggy
+        if not transposed_matrix:
+            transposed_matrix = self.transpose_matrix()
+        paths = self.get_paths(transposed_matrix, depth, current_state)
         unique_paths = []
         for p in paths:
             if p not in unique_paths:
