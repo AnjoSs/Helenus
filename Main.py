@@ -71,21 +71,21 @@ def main():
     # print(p)
 
     """ BPI19 use case """
-    auto_analyser = BPI19UseCaseAnalyser()
-    dfa_auto = auto_analyser.get_dfa()
-
-    threshold = 0.8
-    max_distance = 4
-    dfa_auto.increase_unambiguity(1)
-    Tester.test_unambiguous(dfa_auto)
-    # dfa_bpi19.increase_unambiguity(2)  # TODO takes ages!
-    print("Starting training")
-    auto_analyser.train_matrix(dfa_auto, 'data/bpi19.csv', 1000, max_distance, True)
-    Tester.test_correct_trained_matrix_bpi19(auto_analyser.trained_matrix)
-    print("Starting prediction")
-    auto_analyser.predict_matrix(dfa_auto, 'data/bpi19.csv', 1, 200, 'results/bpi19.csv', max_distance, threshold)
-    precision = auto_analyser.get_precision('data/bpi19.csv', 'results/bpi19.csv', 1, 0, 199, max_distance)
-    print(precision)
+    # auto_analyser = BPI19UseCaseAnalyser()
+    # dfa_auto = auto_analyser.get_dfa()
+    #
+    # threshold = 0.8
+    # max_distance = 4
+    # dfa_auto.increase_unambiguity(1)
+    # Tester.test_unambiguous(dfa_auto)
+    # # dfa_bpi19.increase_unambiguity(2)  # TODO takes ages!
+    # print("Starting training")
+    # auto_analyser.train_matrix(dfa_auto, 'data/bpi19.csv', 1000, max_distance, True)
+    # Tester.test_correct_trained_matrix_bpi19(auto_analyser.trained_matrix)
+    # print("Starting prediction")
+    # auto_analyser.predict_matrix(dfa_auto, 'data/bpi19.csv', 1, 200, 'results/bpi19.csv', max_distance, threshold)
+    # precision = auto_analyser.get_precision('data/bpi19.csv', 'results/bpi19.csv', 1, 0, 199, max_distance)
+    # print(precision)
 
     """ Mate use case """
     # threshold = 0.8
@@ -129,20 +129,20 @@ def main():
     # print(p)
 
     """ Auto Use Case """
-    # auto_analyser = AutoUseCaseAnalyser()
-    # dfa_auto = auto_analyser.get_dfa()
-    #
-    # threshold = 0.7
-    # max_distance = 10
-    # dfa_auto.increase_unambiguity(1)
-    # Tester.test_unambiguous(dfa_auto)
-    # print("Starting training")
-    # auto_analyser.train_matrix(dfa_auto, 'data/auto.csv', 1000, max_distance, True)
-    # Tester.test_correct_trained_matrix_bpi19(auto_analyser.trained_matrix)
-    # print("Starting prediction")
-    # auto_analyser.predict_matrix(dfa_auto, 'data/auto_one_instance.csv', 0, 8, 'results/auto.csv', max_distance, threshold)
-    # precision = auto_analyser.get_precision('data/auto_one_instance.csv', 'results/auto.csv', 0, 0, 7, max_distance)
-    # print(precision)
+    auto_analyser = AutoUseCaseAnalyser()
+    dfa_auto = auto_analyser.get_dfa()
+
+    threshold = 0.7
+    max_distance = 10
+    dfa_auto.increase_unambiguity(1)
+    Tester.test_unambiguous(dfa_auto)
+    print("Starting training")
+    auto_analyser.train_matrix(dfa_auto, 'data/auto.csv', 1000, max_distance, False, True)
+    Tester.test_correct_trained_matrix_bpi19(auto_analyser.trained_matrix)
+    print("Starting prediction")
+    auto_analyser.predict_matrix(dfa_auto, 'data/auto_one_instance.csv', 0, 8, 'results/auto.csv', max_distance, threshold)
+    precision = auto_analyser.get_precision('data/auto_one_instance.csv', 'results/auto.csv', 0, 0, 7, max_distance)
+    print(precision)
 
 
 # Tester.test_precision()

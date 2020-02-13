@@ -52,11 +52,12 @@ class UseCaseAnalyser:
     def get_dfa(self):
         return DFA(self.states, self.start_state, self.alphabet, self.final_states, self.initial_matrix)
 
-    def train_matrix(self, dfa, data_path, training_count, max_distance, has_instances=False):
+    def train_matrix(self, dfa, data_path, training_count, max_distance, has_header, has_instances=False):
         # Copy original matrix + fill with 0
         # plus: save for each state how often it was visited to compute percentages
         matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
         state_visits = []
+        instance_states = {}
         for row in matrix:
             state_visits.append(0)
             for i in range(0, len(row)):
@@ -65,20 +66,24 @@ class UseCaseAnalyser:
         # replay log entries + count transitions
         with open(data_path) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
-            next(csv_reader)  # skip headline TODO add bool variable?
-            last_instance = None
+            if has_header:
+                next(csv_reader)
             current_state = dfa.start_state[0]
             for i in range(0, training_count):
                 next_row = next(csv_reader)
-                if has_instances and self.access_instance(next_row) != last_instance:
-                    current_state = dfa.start_state[0]
-                    last_instance = self.access_instance(next_row)
+                if has_instances:
+                    if self.access_instance(next_row) in instance_states.keys():
+                        current_state = instance_states.get(self.access_instance(next_row))
+                    else:
+                        current_state = dfa.start_state[0]
                 state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
                 next_event = self.access_event(next_row)
                 next_state = dfa.delta(current_state, next_event)
                 matrix[dfa.state_transition_matrix.state_list.index(current_state)][
                     dfa.state_transition_matrix.state_list.index(next_state)] += 1
                 current_state = next_state
+                if has_instances:
+                    instance_states[self.access_instance(next_row)] = current_state
 
         # calculate percentage
         for row in matrix:
