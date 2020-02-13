@@ -493,12 +493,13 @@ class AutoUseCaseAnalyser(UseCaseAnalyser):
         return ['0']
 
     def get_alphabet(self):
-        alphabet = set()
+        alphabet = []
         with open('data/auto.csv') as f:
             r = csv.reader(f, delimiter=',')
             for row in r:
-                alphabet.add(row[1])
-        return list(alphabet)
+                if row[1] not in alphabet:
+                    alphabet.append(row[1])
+        return alphabet
 
     def access_event(self, row):
         return row[1]

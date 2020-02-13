@@ -30,36 +30,31 @@ class State_Transition_Matrix:
         if depth == 0:
             return ['']
 
-        #print('get_paths: ' + str(depth) + current_state)
         paths = []
         for letter_pos in range(0, len(matrix[self.state_list.index(current_state)]) - 1):
-            #print(letter_pos)
-            if matrix[self.state_list.index(current_state)][letter_pos] != []:
+            if matrix[self.state_list.index(current_state)][letter_pos]:
                 letters = matrix[self.state_list.index(current_state)][letter_pos]
-                #print(letters)
 
                 for letter in letters:
-                    #print(letter)
                     next_state = self.state_list[letter_pos]
-                    #print(next_state)
                     next_paths = self.get_paths(matrix, depth-1, next_state)
-                    #print(next_paths)
                     for next_path in next_paths:
-                        #print(next_path)
-                        #print(letter)
                         if next_path == '':
                             paths.append([letter])
                         else:
                             paths.append([next_path, letter])
-        #print(paths)
         return paths
 
-
-    def get_prepaths(self, depth, current_state): # is still buggy
+    def get_prepaths(self, depth, current_state):  # is still buggy
         transpose_matrix = self.transpose_matrix()
-        #print(transpose_matrix)
         paths = self.get_paths(transpose_matrix, depth, current_state)
-        return [list(item) for item in set(tuple(path) for path in paths)]
+        unique_paths = []
+        for p in paths:
+            if p not in unique_paths:
+                unique_paths.append(p)
+        if unique_paths == ['']:
+            return [[]]
+        return unique_paths
 
     def insert_state(self, state):
         self.state_list.append(state)
