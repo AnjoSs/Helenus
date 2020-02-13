@@ -45,31 +45,45 @@ class UseCaseAnalyser:
     def access_event(self, row):
         pass
 
+    @abc.abstractmethod
+    def access_instance(self, row):
+        pass
+
     def get_dfa(self):
         return DFA(self.states, self.start_state, self.alphabet, self.final_states, self.initial_matrix)
 
-    def train_matrix(self, dfa, data_path, training_count, max_distance):
+    def train_matrix(self, dfa, data_path, training_count, max_distance, has_header, has_instances=False):
         # Copy original matrix + fill with 0
         # plus: save for each state how often it was visited to compute percentages
         matrix = copy.deepcopy(dfa.state_transition_matrix.matrix)
         state_visits = []
-        for event in matrix:
+        instance_states = {}
+        for row in matrix:
             state_visits.append(0)
-            for i in range(0, len(event)):
-                event[i] = 0
+            for i in range(0, len(row)):
+                row[i] = 0
 
         # replay log entries + count transitions
         with open(data_path, encoding='windows-1252') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=self.delimiter)
-            next(csv_reader)  # skip headline
+            if has_header:
+                next(csv_reader)
             current_state = dfa.start_state[0]
             for i in range(0, training_count):
+                next_row = next(csv_reader)
+                if has_instances:
+                    if self.access_instance(next_row) in instance_states.keys():
+                        current_state = instance_states.get(self.access_instance(next_row))
+                    else:
+                        current_state = dfa.start_state[0]
                 state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
-                next_event = self.access_event(next(csv_reader))
+                next_event = self.access_event(next_row)
                 next_state = dfa.delta(current_state, next_event)
                 matrix[dfa.state_transition_matrix.state_list.index(current_state)][
                     dfa.state_transition_matrix.state_list.index(next_state)] += 1
                 current_state = next_state
+                if has_instances:
+                    instance_states[self.access_instance(next_row)] = current_state
 
         # calculate percentage
         for row in matrix:
@@ -402,6 +416,9 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
     def access_event(self, row):
         return str(self.event_types.index(row[19]))
 
+    def access_instance(self, row):
+        return row[12]
+
     @staticmethod
     def get_event_types():
         with open('data/bpi19.csv', encoding='windows-1252') as csv_file:
@@ -493,4 +510,48 @@ class BigMateUseCaseAnalyser(UseCaseAnalyser):
     def get_matrix(self):
         matrix = [[['s', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'], ['m']],
                   [['s'], ['m', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']]]
+        return State_Transition_Matrix(self.states, self.alphabet, matrix)
+
+
+""" LTL: F'calculate final price' """
+class AutoUseCaseAnalyser(UseCaseAnalyser):
+    def __init__(self):
+        super().__init__()
+        self.delimiter = ','
+
+    def get_states(self):
+        return ['0', '1']
+
+    def get_final_states(self):
+        return ['1']
+
+    def get_start_state(self):
+        return ['0']
+
+    def get_alphabet(self):
+        alphabet = []
+        with open('data/auto.csv') as f:
+            r = csv.reader(f, delimiter=',')
+            for row in r:
+                if row[1] not in alphabet:
+                    alphabet.append(row[1])
+        return alphabet
+
+    def access_event(self, row):
+        return row[1]
+
+    def access_instance(self, row):
+        return row[0]
+
+    #     0     1
+    # 0   *\x   x
+    # 1   -    `*
+    def get_matrix(self):
+        x = " \'calculate final price\'"
+        except_x = []
+        for a in self.alphabet:
+            if a != x:
+                except_x.append(a)
+        matrix = [[except_x, [x]],
+                  [[], self.alphabet]]
         return State_Transition_Matrix(self.states, self.alphabet, matrix)

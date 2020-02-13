@@ -33,7 +33,7 @@ def main():
         for distance in max_distances:
             logging.info(str(datetime.datetime.now()) + " ## Starting training matrix")
             # TODO auslagern
-            mate_analyser.train_matrix(dfa_mate, 'data/mate.csv', training_log_size, distance)
+            mate_analyser.train_matrix(dfa_mate, 'data/mate.csv', training_log_size, distance, False)
             logging.info(str(datetime.datetime.now()) + " ## Finished training matrix")
             with open('logs/trainedMatrixMate-' + str(order) + '-' + str(distance) + '.csv', 'w') as matrix_file:
                 csv.writer(matrix_file).writerow(str(mate_analyser.trained_matrix))

@@ -53,6 +53,27 @@ class Generator:
     # Events: m - drink mate, s - get shock, c - code
     # LTL: G(m --> Fs)
     @staticmethod
+    def gen_big_mate_data(max_file_length):
+        alphabet = ['m', 's', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
+        with open('data/mate.csv', 'w+', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=';')
+            file_length = 0
+            last_event = random.choice(alphabet)
+            s_to_last_event = random.choice(alphabet)
+            while file_length < max_file_length:
+                if s_to_last_event == 'm' and last_event == 'm':
+                    new_event = numpy.random.choice(alphabet, p=[0.1, 0.8, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+                elif s_to_last_event == 'c' and last_event == 'c':
+                    new_event = numpy.random.choice(alphabet, p=[0.25, 0.05, 0.7, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+                else:
+                    new_event = numpy.random.choice(alphabet)
+                s_to_last_event = last_event
+                last_event = new_event
+                csv_writer.writerow(new_event)
+                file_length += 1
+
+    # LTL: G(m --> Fs)
+    @staticmethod
     def gen_mate_data(max_file_length):
         alphabet = ['m', 's', 'c']
         with open('data/mate.csv', 'w+', newline='') as csv_file:
@@ -62,17 +83,17 @@ class Generator:
             s_to_last_event = random.choice(alphabet)
             while file_length < max_file_length:
                 if s_to_last_event == 'm' and last_event == 'm':
-                    new_event = numpy.random.choice(alphabet, p=[0.1, 0.8, 0.1])
+                    new_event = numpy.random.choice(alphabet,
+                                                    p=[0.1, 0.8, 0.1])
                 elif s_to_last_event == 'c' and last_event == 'c':
-                    new_event = numpy.random.choice(alphabet, p=[0.25, 0.05, 0.7])
+                    new_event = numpy.random.choice(alphabet,
+                                                    p=[0.25, 0.05, 0.7])
                 else:
-                    new_event = numpy.random.choice(alphabet, p=[0.5, 0.5, 0.0])
+                    new_event = numpy.random.choice(alphabet)
                 s_to_last_event = last_event
                 last_event = new_event
                 csv_writer.writerow(new_event)
                 file_length += 1
-
-
 # Generator.generate_abc_use_case(100000)
 # Generator.gen_auto_data()
 Generator.gen_mate_data(100000)

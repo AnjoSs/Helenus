@@ -34,7 +34,7 @@ class DFA:
             pre_paths = self.get_prepaths(order, q) #still buggy
             while len(pre_paths) > 1:
                 a = pre_paths[0]
-                qa = q + str(pre_paths[0]) + "_" + str(order)
+                qa = q + str(a) + "_" + str(order)
 
                 # add qa to matrix
                 self.insert_state(qa)
