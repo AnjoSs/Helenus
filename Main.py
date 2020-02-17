@@ -34,7 +34,7 @@ def main():
         for distance in max_distances:
             logging.info(str(datetime.datetime.now()) + " ## Starting training matrix")
             # TODO auslagern
-            bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', training_log_size, distance, True)
+            bpi19_analyser.train_matrix(dfa_bpi19, 'data/bpi19.csv', training_log_size, distance, True, True)
             logging.info(str(datetime.datetime.now()) + " ## Finished training matrix")
             with open('logs/trainedMatrixBPI19-' + str(order) + '-' + str(distance) + '.csv', 'w') as matrix_file:
                 csv.writer(matrix_file).writerow(str(bpi19_analyser.trained_matrix))
