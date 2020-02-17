@@ -1,4 +1,6 @@
 import csv
+import datetime
+import pandas as pd
 
 import matplotlib.pyplot as plt
 
@@ -36,7 +38,10 @@ def parse_pred_file(file_path, max_dist):
                         summands.append(1-(pred-actual_spread)/max_dist)
             count_total += 1
         assert(len(summands) == count_total)
-        spread_quality = sum(summands)/count_total
+        if len(summands) == 0:
+            spread_quality = 1.0
+        else:
+            spread_quality = sum(summands)/len(summands)
         # print("-1 percentage: " + str(count_1 / count_total) +
         #       "\n0 percentage: " + str(count_0 / count_total) +
         #       "\nmax spread: " + str(max_spread))
@@ -48,7 +53,14 @@ def parse_pred_file(file_path, max_dist):
 thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 max_distances = [5, 10, 40]
 orders = [1, 2]
-
+perf_1_5_01 = pd.to_datetime("2020-02-13 22:21:22.066815") - pd.to_datetime("2020-02-13 22:21:22.059834") # for 500 predictions
+perf_1_40_09 = pd.to_datetime("2020-02-13 22:21:29.692459") - pd.to_datetime("2020-02-13 22:21:29.683450")  # for 500 predictions
+perf_2_5_01 = pd.to_datetime("2020-02-13 22:21:36.578824") - pd.to_datetime("2020-02-13 22:21:36.564869") # for 500 predictions
+perf_2_40_09 = pd.to_datetime("2020-02-13 22:21:46.388433") - pd.to_datetime("2020-02-13 22:21:46.368485")  # for 500 predictions
+print(perf_1_5_01)
+print(perf_1_40_09)
+print(perf_2_5_01)
+print(perf_2_40_09)
 """ 02-11 """
 # res_1_05 = [0.552, 0.612, 0.678, 0.75, 0.778, 0.778, 0.778, 0.778, 0.778]
 # res_1_10 = [0.552, 0.612, 0.678, 0.726, 0.792, 0.702, 0.65, 0.65, 0.65]
@@ -183,11 +195,14 @@ results[5] = res_1_05
 results[10] = res_1_10
 results[40] = res_1_40
 non_trivial_percentages = []
+spread_qualities = []
 for i, d in enumerate(max_distances):
     non_trivial_percentages.append([])
+    spread_qualities.append([])
     for t in thresholds:
-        trivial, max_spread = parse_pred_file('predictions/mate-1-' + str(d) + '-' + str(t) + '.csv', d)
+        trivial, spread_quality = parse_pred_file('predictions/mate-1-' + str(d) + '-' + str(t) + '.csv', d)
         non_trivial_percentages[i].append(1 - trivial)
+        spread_qualities[i].append(spread_quality)
 
 plt.plot(thresholds, results[5], "-", color="#F6A800", label='precision for max_dist = 5')
 plt.plot(thresholds, non_trivial_percentages[0], '--', color="#F6A800", label='non_trivial_perc for max_dist = 5')
@@ -235,11 +250,6 @@ plt.plot(thresholds, non_trivial_percentages[1], '--', color="#DD640C", label='n
 plt.plot(thresholds, results[10], "x", color="#DD640C")
 plt.plot(thresholds, non_trivial_percentages[1], "x", color="#DD640C")
 
-plt.plot(thresholds, results[40], "-", color="#B1063A", label='precision for max_dist = 40')
-plt.plot(thresholds, non_trivial_percentages[2], '--', color="#B1063A", label='non_trivial_perc for max_dist = 40')
-plt.plot(thresholds, results[40], ".", color="#B1063A")
-plt.plot(thresholds, non_trivial_percentages[2], ".", color="#B1063A")
-
 axes = plt.gca()
 axes.set_ylim([0.0, 1.0])
 plt.legend()
@@ -249,3 +259,91 @@ plt.title("Order 2")
 plt.savefig("results/order2.png")
 plt.show()
 
+""" Order 1 Max Dist 5 """
+results[5] = res_1_05
+results[10] = res_1_10
+results[40] = res_1_40
+non_trivial_percentages = []
+spread_qualities = []
+for i, d in enumerate(max_distances):
+    non_trivial_percentages.append([])
+    spread_qualities.append([])
+    for t in thresholds:
+        trivial, spread_quality = parse_pred_file('predictions/mate-1-' + str(d) + '-' + str(t) + '.csv', d)
+        non_trivial_percentages[i].append(1 - trivial)
+        spread_qualities[i].append(spread_quality)
+
+plt.plot(thresholds, results[5], "-", color="#F6A800", label='precision for max_dist = 5')
+plt.plot(thresholds, spread_qualities[0], ':', color="#F6A800", label='spread quality for max_dist = 5')
+plt.plot(thresholds, non_trivial_percentages[0], '--', color="#F6A800", label='non_trivial_perc for max_dist = 5')
+plt.plot(thresholds, results[5], ".", color="#F6A800")
+plt.plot(thresholds, spread_qualities[0], ".", color="#F6A800")
+plt.plot(thresholds, non_trivial_percentages[0], ".", color="#F6A800")
+
+axes = plt.gca()
+axes.set_ylim([0.0, 1.0])
+plt.legend()
+plt.xlabel('Threshold')
+plt.ylabel('Ratio')
+plt.title("Order 1 and Max Distance 5")
+plt.savefig("results/order1Max5.png")
+plt.show()
+
+""" Order 1 Max Dist 5 """
+results[5] = res_2_05
+results[10] = res_2_10
+results[40] = res_2_40
+non_trivial_percentages = []
+spread_qualities = []
+for i, d in enumerate(max_distances):
+    non_trivial_percentages.append([])
+    spread_qualities.append([])
+    for t in thresholds:
+        trivial, spread_quality = parse_pred_file('predictions/mate-2-' + str(d) + '-' + str(t) + '.csv', d)
+        non_trivial_percentages[i].append(1 - trivial)
+        spread_qualities[i].append(spread_quality)
+
+plt.plot(thresholds, results[5], "-", color="#F6A800", label='precision for max_dist = 5')
+plt.plot(thresholds, spread_qualities[0], ':', color="#F6A800", label='spread quality for max_dist = 5')
+plt.plot(thresholds, non_trivial_percentages[0], '--', color="#F6A800", label='non_trivial_perc for max_dist = 5')
+plt.plot(thresholds, results[5], ".", color="#F6A800")
+plt.plot(thresholds, spread_qualities[0], ".", color="#F6A800")
+plt.plot(thresholds, non_trivial_percentages[0], ".", color="#F6A800")
+
+axes = plt.gca()
+axes.set_ylim([0.0, 1.0])
+plt.legend()
+plt.xlabel('Threshold')
+plt.ylabel('Ratio')
+plt.title("Order 2 and Max Distance 5")
+plt.savefig("results/order2Max5.png")
+plt.show()
+
+
+""" BPI 19 Mock """
+results[5] = [1,1,1,1,1,1,1,1,1]
+results[10] = [1,1,1,1,1,1,1,1,1]
+results[40] = [1,1,1,1,1,1,1,1,1]
+non_trivial_percentages = dict()
+non_trivial_percentages[0] = [0,0,0,0,0,0,0,0,0]
+non_trivial_percentages[1] = [0,0,0,0,0,0,0,0,0]
+non_trivial_percentages[2] = [0,0,0,0,0,0,0,0,0]
+
+plt.plot(thresholds, results[5], "-", color="#F6A800", label='precision for max_dist = 5')
+plt.plot(thresholds, non_trivial_percentages[0], '--', color="#F6A800", label='non_trivial_perc for max_dist = 5')
+plt.plot(thresholds, results[5], "o", color="#F6A800")
+plt.plot(thresholds, non_trivial_percentages[0], ".", color="#F6A800")
+
+plt.plot(thresholds, results[10], "-", color="#DD640C", label='precision for max_dist = 10')
+plt.plot(thresholds, non_trivial_percentages[1], '--', color="#DD640C", label='non_trivial_perc for max_dist = 10')
+plt.plot(thresholds, results[10], "x", color="#DD640C")
+plt.plot(thresholds, non_trivial_percentages[1], "x", color="#DD640C")
+
+axes = plt.gca()
+axes.set_ylim([-0.1, 1.1])
+plt.legend()
+plt.xlabel('Threshold')
+plt.ylabel('Ratio')
+plt.title("Order 1")
+plt.savefig("results/bpi19mock.png")
+plt.show()
