@@ -405,17 +405,20 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
         cell_yes_yes = []
         for event in self.event_types:
             if event != self.a:
-                cell_no_no.append(str(self.event_types.index(event)))
-            cell_yes_yes.append(str(self.event_types.index(event)))
-        state_transition_matrix = [[cell_no_no, [str(self.event_types.index(self.a))]],
+                cell_no_no.append(self.event_types.index(event) + 1)
+            cell_yes_yes.append(self.event_types.index(event) + 1)
+        state_transition_matrix = [[cell_no_no, [self.event_types.index(self.a) + 1]],
                                    [[], cell_yes_yes]]
         return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
 
     def get_alphabet(self):
-        return self.event_types
+        index_alphabet = list()
+        for i in range(0, len(self.event_types)):
+            index_alphabet.append(i + 1)
+        return index_alphabet
 
     def access_event(self, row):
-        return str(self.event_types.index(row[19]))
+        return self.event_types.index(row[19]) + 1
 
     def access_instance(self, row):
         return row[12]

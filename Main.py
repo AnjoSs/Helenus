@@ -27,7 +27,10 @@ def main():
     for order in orders_to_test:
         print("Processing order " + str(order))
         logging.info(str(datetime.datetime.now()) + " ## Starting increasing unambiguity: " + str(order))
-        dfa_bpi19.increase_unambiguity(order)
+        if order == 1:
+            dfa_bpi19.increase_unambiguity_to_1()
+        else:
+            dfa_bpi19.increase_unambiguity(order)
         logging.info(str(datetime.datetime.now()) + " ## Finished increasing unambiguity: " + str(order))
         tested_thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         max_distances = [5, 10, 40]  # TODO change to something way bigger (5 for 3 event types --> for 40 event types: 40-67!
