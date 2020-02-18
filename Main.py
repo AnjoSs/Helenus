@@ -4,6 +4,7 @@ from UseCaseAnalyser_Class import BPIUseCaseAnalyser, ABCUseCaseAnalyser, BPI19U
     AutoUseCaseAnalyser
 from Tester_Class import Tester
 import datetime
+import cProfile
 
 
 def main():
@@ -35,7 +36,7 @@ def main():
     # mate_analyser = ABCUseCaseAnalyser()
     # dfa = mate_analyser.get_dfa()
     # print("Starting unambiguity 1")
-    # dfa.increase_unambiguity(1)
+    # dfa.increase_unambiguity_to_1()
     # Tester.test_unambiguous(dfa)
     # mate_analyser.train_matrix(dfa, 'data/abc_fixed.csv', 999, max_distance, False)
     # Tester.test_correct_trained_matrix_abc(mate_analyser.trained_matrix)
@@ -134,8 +135,9 @@ def main():
 
     threshold = 0.7
     max_distance = 10
-    dfa_auto.increase_unambiguity(1)
-    Tester.test_unambiguous(dfa_auto)
+    dfa_auto.increase_unambiguity_to_1()
+    dfa_auto.increase_unambiguity(2)
+    # Tester.test_unambiguous(dfa_auto)
     print("Starting training")
     auto_analyser.train_matrix(dfa_auto, 'data/auto.csv', 1000, max_distance, False, True)
     Tester.test_correct_trained_matrix_bpi19(auto_analyser.trained_matrix)
@@ -146,4 +148,5 @@ def main():
 
 
 # Tester.test_precision()
-main()
+cProfile.run("main()")
+# main()
