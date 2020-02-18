@@ -53,6 +53,7 @@ class State_Transition_Matrix:
                         paths.append(next_path)
         return paths
 
+    # TODO current bottleneck, rethink algorithm
     def get_paths_np(self, matrix, depth, current_state):
         if depth == 0:
             return [[]]
@@ -110,12 +111,6 @@ class State_Transition_Matrix:
         self.matrix[self.state_list.index(target)] = copy.deepcopy(self.matrix[self.state_list.index(source)])
 
     def transpose_matrix(self):
-        # transposed_matrix = copy.deepcopy(self.matrix)
-        # for row_idx in range(0, len(self.matrix)):
-        #     for col_idx in range(0, len(self.matrix[0])):
-        #         transposed_matrix[col_idx][row_idx] = copy.deepcopy(self.matrix[row_idx][col_idx])
-        # return transposed_matrix
-
         transposed_matrix = []
         for original_col_id in range(0, len(self.matrix[0])):
             transposed_matrix.append([])
