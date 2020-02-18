@@ -4,6 +4,7 @@ from Tester_Class import Tester
 from UseCaseAnalyser_Class import BPI19UseCaseAnalyser
 import logging
 import datetime
+import cProfile
 
 
 def main():
@@ -53,4 +54,5 @@ def main():
 
 
 # Tester.test_precision()
-main()
+cProfile.run("main()")
+# main()

@@ -76,20 +76,20 @@ class UseCaseAnalyser:
                         current_state = instance_states.get(self.access_instance(next_row))
                     else:
                         current_state = dfa.start_state[0]
-                state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
+                current_state_idx = dfa.state_transition_matrix.state_list.index(current_state)
+                state_visits[current_state_idx] += 1
                 next_event = self.access_event(next_row)
-                next_state = dfa.delta(current_state, next_event)
-                matrix[dfa.state_transition_matrix.state_list.index(current_state)][
-                    dfa.state_transition_matrix.state_list.index(next_state)] += 1
+                next_state = dfa.delta_np(current_state, next_event)
+                matrix[current_state_idx][dfa.state_transition_matrix.state_list.index(next_state)] += 1
                 current_state = next_state
                 if has_instances:
                     instance_states[self.access_instance(next_row)] = current_state
 
         # calculate percentage
-        for row in matrix:
+        for row_idx, row in enumerate(matrix):
             for i in range(0, len(row)):
-                if state_visits[matrix.index(row)] != 0:
-                    row[i] = row[i] / state_visits[matrix.index(row)]
+                if state_visits[row_idx] != 0:
+                    row[i] = row[i] / state_visits[row_idx]
 
         self.trained_matrix = np.array(matrix)
         self.compute_depth_matrices(max_distance)
@@ -112,7 +112,7 @@ class UseCaseAnalyser:
             if depth == 1:
                 depth_matrix = self.trained_matrix
             else:
-                depth_matrix = self.depth_matrices[depth-1].dot(self.trained_matrix)
+                depth_matrix = self.depth_matrices[depth - 1].dot(self.trained_matrix)
             self.depth_final_state_probability[depth] = depth_matrix.dot(final_states_vector)
             self.depth_matrices[depth] = depth_matrix.dot(nulling_matrix)
 
@@ -129,7 +129,7 @@ class UseCaseAnalyser:
                 csv_writer = csv.writer(resultFile, delimiter=self.delimiter)
                 for i in range(log_begin, log_end):
                     current_event = next(csv_reader)
-                    new_state = dfa.delta(current_state, self.access_event(current_event))
+                    new_state = dfa.delta_np(current_state, self.access_event(current_event))
 
                     # iterate over events and predict the shortest path that leads to an accepting state
                     # with p > threshold
@@ -146,8 +146,9 @@ class UseCaseAnalyser:
         if current_state in self.final_states:
             return 0
         prob = 0
+        current_state_idx = self.states.index(current_state)
         for possible_spread in range(1, max_distance + 1):
-            prob += self.depth_final_state_probability[possible_spread][self.states.index(current_state)]
+            prob += self.depth_final_state_probability[possible_spread][current_state_idx]
             if prob >= threshold:
                 return possible_spread
         return -1
@@ -172,14 +173,14 @@ class UseCaseAnalyser:
                     for j in range(0, actual_log_begin + i):
                         next(actual_reader)
                     event_leading_to_current_state = self.access_event(next(actual_reader))
-                    assert (event_leading_to_current_state == predicted_row[1])
+                    assert (event_leading_to_current_state == int(predicted_row[1]))
                     # case for prediction that final state is not reached in next max_spread events
                     if predicted_spread == -1:
                         prediction_correct = 1
                         for j in range(0, max_spread):
                             next_row = next(actual_reader)
                             next_event = self.access_event(next_row)
-                            actual_next_state = self.dfa.delta(current_state, next_event)
+                            actual_next_state = self.dfa.delta_np(current_state, next_event)
                             if actual_next_state in self.dfa.final_states:
                                 prediction_correct = 0
                                 break
@@ -201,7 +202,7 @@ class UseCaseAnalyser:
                         for j in range(0, predicted_spread):
                             next_row = next(actual_reader)
                             next_event = self.access_event(next_row)
-                            actual_next_state = self.dfa.delta(current_state, next_event)
+                            actual_next_state = self.dfa.delta_np(current_state, next_event)
                             if actual_next_state in self.dfa.final_states:
                                 prediction_correct = 1
                                 break
@@ -264,11 +265,11 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
     def get_matrix(self):
         row_AA = []
         row_BB = []
-        for event in self.event_types:
+        for event_idx, event in enumerate(self.event_types):
             if event != self.b:
-                row_AA.append(str(self.event_types.index(event)))
+                row_AA.append(str(event_idx))
             if event != self.a:
-                row_BB.append(str(self.event_types.index(event)))
+                row_BB.append(str(event_idx))
 
         state_transition_matrix = [[row_AA, [str(self.event_types.index(self.b))]],
                                    [[str(self.event_types.index(self.a))], row_BB]]
@@ -296,20 +297,20 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
             csv_reader = csv.reader(csv_file, delimiter=';')
             next(csv_reader)
             current_state = dfa.start_state[0]
+            current_state_idx = dfa.state_transition_matrix.state_list.index(current_state)
             for i in range(0, training_count):
                 row = next(csv_reader)
                 if row[1] in self.event_types:
-                    state_visits[dfa.state_transition_matrix.state_list.index(current_state)] += 1
-                    next_state = dfa.delta(current_state, str(self.event_types.index(row[1])))
-                    matrix[dfa.state_transition_matrix.state_list.index(current_state)][
-                        dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
+                    state_visits[current_state_idx] += 1
+                    next_state = dfa.delta_np(current_state, str(self.event_types.index(row[1])))
+                    matrix[current_state_idx][dfa.state_transition_matrix.state_list.index(next_state)][0] += 1
                     current_state = next_state
 
         # calculate percentage
-        for row in matrix:
+        for row_idx, row in enumerate(matrix):
             for col in row:
-                if state_visits[matrix.index(row)] != 0:
-                    col[0] = col[0] / state_visits[matrix.index(row)]
+                if state_visits[row_idx] != 0:
+                    col[0] = col[0] / state_visits[row_idx]
 
         self.trained_matrix = matrix
         return
@@ -329,7 +330,7 @@ class BPIUseCaseAnalyser(UseCaseAnalyser):
                 for i in range(log_begin, log_end):
                     current_event = next(csv_reader)
                     if self.access_event(current_event) in self.alphabet:
-                        new_state = dfa.delta(current_state, self.access_event(current_event))
+                        new_state = dfa.delta_np(current_state, self.access_event(current_event))
 
                         spread = self.find_spread(current_state, max_distance, threshold)
 
@@ -483,6 +484,7 @@ class MateUseCaseAnalyser(UseCaseAnalyser):
 """ LTL: F'calculate final price' """
 class AutoUseCaseAnalyser(UseCaseAnalyser):
     def __init__(self):
+        self.actual_alphabet = []
         super().__init__()
         self.delimiter = ','
 
@@ -502,10 +504,14 @@ class AutoUseCaseAnalyser(UseCaseAnalyser):
             for row in r:
                 if row[1] not in alphabet:
                     alphabet.append(row[1])
-        return alphabet
+        self.actual_alphabet = alphabet
+        index_alphabet = list()
+        for i in range(0, len(alphabet)):
+            index_alphabet.append(i + 1)
+        return index_alphabet
 
     def access_event(self, row):
-        return row[1]
+        return self.actual_alphabet.index(row[1]) + 1
 
     def access_instance(self, row):
         return row[0]
@@ -514,11 +520,11 @@ class AutoUseCaseAnalyser(UseCaseAnalyser):
     # 0   *\x   x
     # 1   -    `*
     def get_matrix(self):
-        x = " \'calculate final price\'"
+        x = self.actual_alphabet.index(" \'calculate final price\'") + 1
         except_x = []
         for a in self.alphabet:
             if a != x:
                 except_x.append(a)
         matrix = [[except_x, [x]],
-                  [[], self.alphabet]]
+                  [[], copy.deepcopy(self.alphabet)]]
         return State_Transition_Matrix(self.states, self.alphabet, matrix)
