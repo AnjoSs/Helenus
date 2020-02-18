@@ -16,7 +16,6 @@ class State_Transition_Matrix:
                     new_matrix[row_idx][col_idx] = col[0]
         self.matrix = new_matrix
 
-    # TODO use transformed matrix instead?!
     def get_predecessor_states(self, state):
         predecessors = []
         state_idx = self.state_list.index(state)
@@ -28,17 +27,13 @@ class State_Transition_Matrix:
     def get_predecessor_states_np(self, state):
         predecessors = []
         state_idx = self.state_list.index(state)
+        len_states = len(self.state_list)
         for col_idx, cell in enumerate(self.matrix.T[state_idx]):
+            if col_idx >= len_states:
+                break
             if cell != 0.0:
                 predecessors.append(self.state_list[col_idx])
         return predecessors
-
-    def delta_non_deterministic(self, matrix, state):
-        next_states = []
-        state_idx = self.state_list.index(state)
-        for letter_array in matrix[state_idx]:
-            next_states.append(self.state_list[matrix[state_idx].index(letter_array)])
-        return next_states
 
     def get_paths(self, matrix, depth, current_state):
         if depth == 0:
@@ -64,33 +59,25 @@ class State_Transition_Matrix:
 
         paths = []
         state_idx = self.state_list.index(current_state)
+        current_state_row = matrix[state_idx]
         for col_idx in range(0, len(self.state_list)):
-            if matrix[state_idx][col_idx] != 0.0:
-                letter = matrix[state_idx][col_idx]
+            if current_state_row[col_idx] != 0.0:
+                letter = current_state_row[col_idx]
                 next_state = self.state_list[col_idx]
                 next_paths = self.get_paths_np(matrix, depth-1, next_state)
                 for next_path in next_paths:
                     next_path.append(letter)
                     paths.append(next_path)
-        return paths
+        return self.uniquify_array(paths)
 
     def get_prepaths(self, depth, current_state, transposed_matrix=None):
         if not transposed_matrix:
             transposed_matrix = self.transpose_matrix()
         paths = self.get_paths(transposed_matrix, depth, current_state)
-        unique_paths = []
-        for p in paths:
-            if p not in unique_paths:
-                unique_paths.append(p)
-        return unique_paths
+        return self.uniquify_array(paths)
 
     def get_prepaths_np(self, depth, current_state):
-        paths = self.get_paths_np(self.matrix.T, depth, current_state)
-        unique_paths = []
-        for p in paths:
-            if p not in unique_paths:
-                unique_paths.append(p)
-        return unique_paths
+        return self.get_paths_np(self.matrix.T, depth, current_state)
 
     def insert_state(self, state):
         self.state_list.append(state)
@@ -147,3 +134,10 @@ class State_Transition_Matrix:
 
     def remove_transition_np(self, source, target, letter):
         self.matrix[self.state_list.index(source)][self.state_list.index(target)] = 0.0
+
+    def uniquify_array(self, array):
+        unique_array = []
+        for p in array:
+            if p not in unique_array:
+                unique_array.append(p)
+        return unique_array
