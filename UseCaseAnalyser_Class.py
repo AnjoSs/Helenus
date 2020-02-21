@@ -127,19 +127,33 @@ class UseCaseAnalyser:
 
             with open(result_path, 'w', newline='\n', encoding='windows-1252') as resultFile:
                 csv_writer = csv.writer(resultFile, delimiter=self.delimiter)
-                for i in range(log_begin, log_end):
-                    current_event = next(csv_reader)
-                    new_state = dfa.delta_np(current_state, self.access_event(current_event))
+                if log_end is None:
+                    for current_event in csv_reader:
+                        new_state = dfa.delta_np(current_state, self.access_event(current_event))
 
-                    # iterate over events and predict the shortest path that leads to an accepting state
-                    # with p > threshold
-                    spread = self.find_spread(new_state, max_distance, threshold)
-                    # edge case for small dataset
-                    if spread is None:
-                        spread = -1
+                        # iterate over events and predict the shortest path that leads to an accepting state
+                        # with p > threshold
+                        spread = self.find_spread(new_state, max_distance, threshold)
+                        # edge case for small dataset
+                        if spread is None:
+                            spread = -1
 
-                    csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
-                    current_state = new_state
+                        csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
+                        current_state = new_state
+                else:
+                    for i in range(log_begin, log_end):
+                        current_event = next(csv_reader)
+                        new_state = dfa.delta_np(current_state, self.access_event(current_event))
+
+                        # iterate over events and predict the shortest path that leads to an accepting state
+                        # with p > threshold
+                        spread = self.find_spread(new_state, max_distance, threshold)
+                        # edge case for small dataset
+                        if spread is None:
+                            spread = -1
+
+                        csv_writer.writerow([current_state, self.access_event(current_event), new_state, spread])
+                        current_state = new_state
         return
 
     def find_spread(self, current_state, max_distance, threshold):
@@ -161,6 +175,12 @@ class UseCaseAnalyser:
             # skip to log_begin position
             for i in range(0, predicted_log_begin):
                 next(predicted_reader)
+            file_length = 0
+            with open(predicted_data_path, encoding='windows-1252') as f:
+                for r in csv.reader(f):
+                    file_length += 1
+            if predicted_log_end is None:
+                predicted_log_end = file_length
             # check correctness of predictions
             for i in range(predicted_log_begin, predicted_log_end):
                 predicted_row = next(predicted_reader)
@@ -177,7 +197,8 @@ class UseCaseAnalyser:
                     # case for prediction that final state is not reached in next max_spread events
                     if predicted_spread == -1:
                         prediction_correct = 1
-                        for j in range(0, max_spread):
+                        forecast_end = min(max_spread, file_length - i - 1)
+                        for j in range(0, forecast_end):
                             next_row = next(actual_reader)
                             next_event = self.access_event(next_row)
                             actual_next_state = self.dfa.delta_np(current_state, next_event)
@@ -189,17 +210,11 @@ class UseCaseAnalyser:
                             prediction_correct = 1
                         else:
                             print("error")
-                        # next_row = next(actual_reader)
-                        # next_event = self.access_event(next_row)  # next?event == predicted?row[1]
-                        # actual_next_state = self.dfa.delta(current_state, next_event)
-                        # if actual_next_state in self.dfa.final_states:
-                        #     prediction_correct = 1
-                        # else:
-                        #     print("error")
                     else:
                         prediction_correct = 0
                         # check for predicted_spread many actual events if they lead to a final state or not
-                        for j in range(0, predicted_spread):
+                        forecast_end = min(max_spread, file_length - i - 1)
+                        for j in range(0, forecast_end):
                             next_row = next(actual_reader)
                             next_event = self.access_event(next_row)
                             actual_next_state = self.dfa.delta_np(current_state, next_event)
@@ -399,7 +414,7 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
         return ["yes"]
 
     def get_start_state(self):
-        return ["no"]
+        return ["yes"]
 
     def get_matrix(self):
         cell_no_no = []

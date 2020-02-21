@@ -105,7 +105,7 @@ class Generator:
                 next(r)
             count = 0
             for row in r:
-                if len(instances) > 100:
+                if len(instances) >= 100:
                     break
                 if row[15] not in instances:
                     instances.append(row[15])
