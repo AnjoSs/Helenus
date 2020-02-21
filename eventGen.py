@@ -96,17 +96,41 @@ class Generator:
                 file_length += 1
 
     @staticmethod
-    def bpi19():
-        with open("data/bpi19.csv") as f:
+    def bpi19_one_instances():
+        with open("data/bpi19_cleaned.csv") as f:
             r = csv.reader(f, delimiter=',')
-            with open("data/bpi19_one_instance.csv", 'w+', newline='') as g:
-                w = csv.writer(g, delimiter=',')
-                next(r)  # skip headline
-                first = next(r)
-                instance = first[12] + first[14]  # 15 stattdessen
-                for row in r:
-                    if instance == row[12] + first[14]:
-                        w.writerow(row[19])
+            next(r)  # skip headline
+            instances = []
+            for i in range(0, 5000):  # TODO revalidate training size
+                next(r)
+            count = 0
+            for row in r:
+                if len(instances) > 100:
+                    break
+                if row[15] not in instances:
+                    instances.append(row[15])
+                    open("data/instances/" + str(count) + ".csv", 'w+', newline='')
+                    count += 1
+        with open("data/bpi19_cleaned.csv") as f:
+            r = csv.reader(f, delimiter=',')
+            next(r)  # skip headline
+            for row in r:
+                if row[15] in instances:
+                    with open("data/instances/" + str(instances.index(row[15])) + ".csv", 'a', newline='') as g:
+                        w = csv.writer(g, delimiter=',')
+                        w.writerow(row)
+
+            # # lookup index, write to file
+            # for i in range(0, 100):
+            #     with open("data/instances/" + str(i) + ".csv", 'w+', newline='') as g:
+            #         next(r)  # skip headline
+            #         w = csv.writer(g, delimiter=',')
+            #         first = next(r)
+            #         instances.append(first[15])
+            #         instance = first[15]
+            #         for row in r:
+            #             if instance == row[15]:
+            #                 w.writerow(row[19])
 
     @staticmethod
     def bpi19_cleanup():
@@ -126,4 +150,4 @@ class Generator:
 # Generator.generate_abc_use_case(100000)
 # Generator.gen_auto_data()
 # Generator.gen_mate_data(100000)
-Generator.bpi19_cleanup()
+Generator.bpi19_one_instances()
