@@ -379,14 +379,15 @@ class ABCUseCaseAnalyser(UseCaseAnalyser):
 
 """
 BPI 2019 Challenge
-LTL: F('SRM: Transfer Failed (E.Sys.)') == Fa
+LTL: G('Record Invoice Receipt' → F'Clear Invoice') = G(a --> Fb)
 initial order 0
 """
 
 
 class BPI19UseCaseAnalyser(UseCaseAnalyser):
     def __init__(self):
-        self.a = 'SRM: Transfer Failed (E.Sys.)'
+        self.a = 'Record Invoice Receipt'
+        self.b = 'Clear Invoice'
         self.event_types = self.get_event_types()
         super().__init__()
         self.delimiter = ','
@@ -404,11 +405,12 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
         cell_no_no = []
         cell_yes_yes = []
         for event in self.event_types:
-            if event != self.a:
+            if event != self.b:
                 cell_no_no.append(self.event_types.index(event) + 1)
-            cell_yes_yes.append(self.event_types.index(event) + 1)
-        state_transition_matrix = [[cell_no_no, [self.event_types.index(self.a) + 1]],
-                                   [[], cell_yes_yes]]
+            if event != self.a:
+                cell_yes_yes.append(self.event_types.index(event) + 1)
+        state_transition_matrix = [[cell_no_no, [self.event_types.index(self.b) + 1]],
+                                   [[self.event_types.index(self.a) + 1], cell_yes_yes]]
         return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
 
     def get_alphabet(self):
@@ -421,11 +423,11 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
         return self.event_types.index(row[19]) + 1
 
     def access_instance(self, row):
-        return row[12]
+        return row[15]
 
     @staticmethod
     def get_event_types():
-        with open('data/bpi19.csv', encoding='windows-1252') as csv_file:
+        with open('data/bpi19_cleaned.csv', encoding='windows-1252') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)
             event_types = []

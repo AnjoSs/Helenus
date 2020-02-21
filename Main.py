@@ -42,7 +42,7 @@ def main():
             logging.info(str(datetime.datetime.now()) + " ## Finished training matrix")
             with open('logs/trainedMatrixBPI19-' + str(order) + '-' + str(distance) + '.csv', 'w') as matrix_file:
                 csv.writer(matrix_file).writerow(str(bpi19_analyser.trained_matrix))
-            data_path = 'data/bpi19.csv'
+            data_path = 'data/bpi19_cleaned.csv'
             print("Processing distance: " + str(distance))
             logging.info(str(datetime.datetime.now()) + " ### Starting tests for max_distance: " + str(distance))
             for threshold in tested_thresholds:
