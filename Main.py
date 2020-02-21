@@ -22,7 +22,7 @@ def main():
 
     # TODO change to [1, 2, 3]
     orders_to_test = [1, 2, 3]
-    training_log_size = 10000000
+    training_log_size = 1000000
     # prediction_size = 500
     for order in orders_to_test:
         print("Processing order " + str(order))
