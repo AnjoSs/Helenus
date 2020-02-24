@@ -1,7 +1,7 @@
 import csv
 
 from Tester_Class import Tester
-from UseCaseAnalyser_Class import BPI19UseCaseAnalyser
+from UseCaseAnalyser_Class import BPI19UseCaseAnalyser, BPI19FinallyAnalyser
 import logging
 import datetime
 import cProfile
@@ -13,7 +13,7 @@ def main():
     """ BPI19 use case """
     logging.info(str(datetime.datetime.now()) + " # Starting BPI19 Use Case with LTL: Fa")
     logging.info(str(datetime.datetime.now()) + " ## Starting creating use case dfa")
-    bpi19_analyser = BPI19UseCaseAnalyser()
+    bpi19_analyser = BPI19FinallyAnalyser()
     dfa_bpi19 = bpi19_analyser.get_dfa()
     logging.info(str(datetime.datetime.now()) + " ## Finished creating use case dfa")
     with open('logs/dfaBPI19.csv', 'w') as dfa_file:
