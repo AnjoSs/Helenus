@@ -46,21 +46,31 @@ def main():
             print("Processing distance: " + str(distance))
             logging.info(str(datetime.datetime.now()) + " ### Starting tests for max_distance: " + str(distance))
             prec_file = open("logs/precision_" + str(order) + "_" + str(distance) + ".csv", "w+", newline='')
+            dur_file = open("logs/duration_" + str(order) + "_" + str(distance) + ".csv", "w+", newline='')
             for threshold in tested_thresholds:
                 print("Processing threshold: " + str(threshold))
                 precisions = []
+                durations = []
                 for i in range(0, 100):
                     data_path = 'data/instances/' + str(i) + '.csv'
                     prediction_path = 'predictions/bpi19-' + str(order) + '-' + str(distance) + '-' + str(threshold) + '_' + str(i) + '.csv'
                     # logging.info(str(datetime.datetime.now()) + " #### Starting prediction for threshold " + str(threshold))
+                    start = datetime.datetime.now()
                     bpi19_analyser.predict_matrix(dfa_bpi19, data_path, 0, None, prediction_path, distance, threshold)
+                    duration = datetime.datetime.now() - start
+                    durations.append(duration)
                     # logging.info(str(datetime.datetime.now()) + " #### Finished prediction for threshold " + str(threshold))
                     # logging.info(str(datetime.datetime.now()) + " #### Starting precision calculation for threshold " + str(threshold))
                     precision = bpi19_analyser.get_precision(data_path, prediction_path, 0, 0, None, distance)
                     precisions.append(precision)
                 p = sum(precisions) / len(precisions)
+                dur_sum = 0
+                for d in durations:
+                    dur_sum += d.total_seconds()
+                duration = dur_sum / len(durations)
                 logging.info(str(datetime.datetime.now()) + " #### Finished precision calculation for threshold " + str(threshold) + " - precision: " + str(p))
                 csv.writer(prec_file).writerow([str(p)])
+                csv.writer(dur_file).writerow([str(duration)])
 
 
 # Tester.test_precision()
