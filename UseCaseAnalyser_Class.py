@@ -458,7 +458,6 @@ class BPI19UseCaseAnalyser(UseCaseAnalyser):
 class BPI19FinallyAnalyser(BPI19UseCaseAnalyser):
     def __init__(self):
         super().__init__()
-        self.a = 'Clear Invoice'
         self.delimiter = ','
 
     def get_start_state(self):
@@ -468,10 +467,10 @@ class BPI19FinallyAnalyser(BPI19UseCaseAnalyser):
         cell_no_no = []
         cell_yes_yes = []
         for event in self.event_types:
-            if event != self.a:
+            if event != self.b:
                 cell_no_no.append(self.event_types.index(event) + 1)
             cell_yes_yes.append(self.event_types.index(event) + 1)
-        state_transition_matrix = [[cell_no_no, [self.event_types.index(self.a) + 1]],
+        state_transition_matrix = [[cell_no_no, [self.event_types.index(self.b) + 1]],
                                    [[], cell_yes_yes]]
         return State_Transition_Matrix(self.states, self.alphabet, state_transition_matrix)
 
